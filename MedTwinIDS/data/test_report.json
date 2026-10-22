@@ -1,0 +1,26 @@
+{
+  "rows_in": 652117,
+  "dropped_missing_essential": 32,
+  "dropped_exact_duplicates": 704,
+  "dropped_negative_time": 0,
+  "vital_glitches_nulled": 61,
+  "rows_out": 651381,
+  "flows": 64646,
+  "attack_flows": 9511,
+  "name": "test",
+  "seed": 2026,
+  "hours": 3.0,
+  "window": 5.0,
+  "packets": 652117,
+  "attack_packets": 251980,
+  "campaigns": 30,
+  "class_counts": {
+    "normal": 55135,
+    "reconnaissance": 8358,
+    "data_alteration": 424,
+    "dos_flood": 274,
+    "spoofing": 196,
+    "exfiltration": 162,
+    "unauthorised_access": 97
+  }
+}

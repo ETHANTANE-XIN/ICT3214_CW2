@@ -1,0 +1,26 @@
+{
+  "rows_in": 1504385,
+  "dropped_missing_essential": 83,
+  "dropped_exact_duplicates": 1480,
+  "dropped_negative_time": 0,
+  "vital_glitches_nulled": 140,
+  "rows_out": 1502822,
+  "flows": 126777,
+  "attack_flows": 16960,
+  "name": "train",
+  "seed": 7,
+  "hours": 6.0,
+  "window": 5.0,
+  "packets": 1504385,
+  "attack_packets": 730117,
+  "campaigns": 60,
+  "class_counts": {
+    "normal": 109817,
+    "reconnaissance": 14455,
+    "data_alteration": 1030,
+    "dos_flood": 543,
+    "spoofing": 378,
+    "exfiltration": 335,
+    "unauthorised_access": 219
+  }
+}
