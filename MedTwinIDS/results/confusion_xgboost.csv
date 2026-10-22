@@ -1,0 +1,8 @@
+,normal,dos_flood,spoofing,data_alteration,unauthorised_access,reconnaissance,exfiltration
+normal,55120,0,0,7,4,4,0
+dos_flood,2,270,2,0,0,0,0
+spoofing,3,0,190,3,0,0,0
+data_alteration,29,0,0,395,0,0,0
+unauthorised_access,0,0,0,0,97,0,0
+reconnaissance,0,0,0,0,0,8358,0
+exfiltration,0,0,0,0,0,0,162

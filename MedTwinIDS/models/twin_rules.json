@@ -1,0 +1,17 @@
+{
+  "quantile": 0.999,
+  "thresholds": {
+    "SeqDup": 1.0,
+    "SeqGap": 0.0,
+    "TwinResidualHR": 13.950613333333303,
+    "TwinResidualSpO2": 2.9801599999995387,
+    "PumpRateDelta": 0.0
+  },
+  "rules": {
+    "R1": "unregistered sender",
+    "R2": "MAC or TTL differs from registry",
+    "R3": "sequence numbers duplicated or missing",
+    "R4": "monitor and wearable disagree",
+    "R5": "unusual pump-rate change"
+  }
+}

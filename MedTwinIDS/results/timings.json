@@ -1,0 +1,11 @@
+{
+  "simulate": "2 min",
+  "train": "12 min",
+  "experiments": "30 to 40 min",
+  "replay": "8 to 11 min",
+  "realtime": "3 min",
+  "realtime_rules": "4 min",
+  "figures": "under 1 min",
+  "tests": "1.5 min",
+  "total_min": 70
+}

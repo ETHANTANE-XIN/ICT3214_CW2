@@ -1,0 +1,49 @@
+attack,intensity,recall,model
+data_alteration,high,1.0,Random Forest
+data_alteration,low,0.7972350230414746,Random Forest
+data_alteration,medium,0.6666666666666666,Random Forest
+dos_flood,high,1.0,Random Forest
+dos_flood,low,0.9943502824858758,Random Forest
+dos_flood,medium,0.9523809523809523,Random Forest
+exfiltration,high,1.0,Random Forest
+exfiltration,low,0.9722222222222222,Random Forest
+exfiltration,medium,1.0,Random Forest
+reconnaissance,high,1.0,Random Forest
+reconnaissance,low,1.0,Random Forest
+reconnaissance,medium,1.0,Random Forest
+spoofing,low,0.38392857142857145,Random Forest
+spoofing,medium,0.44047619047619047,Random Forest
+unauthorised_access,low,1.0,Random Forest
+unauthorised_access,medium,1.0,Random Forest
+data_alteration,high,1.0,XGBoost
+data_alteration,low,0.8663594470046083,XGBoost
+data_alteration,medium,1.0,XGBoost
+dos_flood,high,1.0,XGBoost
+dos_flood,low,0.9887005649717514,XGBoost
+dos_flood,medium,1.0,XGBoost
+exfiltration,high,1.0,XGBoost
+exfiltration,low,1.0,XGBoost
+exfiltration,medium,1.0,XGBoost
+reconnaissance,high,1.0,XGBoost
+reconnaissance,low,1.0,XGBoost
+reconnaissance,medium,1.0,XGBoost
+spoofing,low,0.9821428571428571,XGBoost
+spoofing,medium,0.9880952380952381,XGBoost
+unauthorised_access,low,1.0,XGBoost
+unauthorised_access,medium,1.0,XGBoost
+data_alteration,high,1.0,MLP
+data_alteration,low,0.8986175115207373,MLP
+data_alteration,medium,0.9607843137254902,MLP
+dos_flood,high,1.0,MLP
+dos_flood,low,0.9887005649717514,MLP
+dos_flood,medium,1.0,MLP
+exfiltration,high,1.0,MLP
+exfiltration,low,1.0,MLP
+exfiltration,medium,1.0,MLP
+reconnaissance,high,1.0,MLP
+reconnaissance,low,1.0,MLP
+reconnaissance,medium,1.0,MLP
+spoofing,low,1.0,MLP
+spoofing,medium,0.9523809523809523,MLP
+unauthorised_access,low,1.0,MLP
+unauthorised_access,medium,1.0,MLP

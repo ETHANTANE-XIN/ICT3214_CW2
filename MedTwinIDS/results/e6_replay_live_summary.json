@@ -1,0 +1,288 @@
+{
+  "overall": {
+    "campaigns": 30,
+    "detected": 30,
+    "detection_rate": 1.0,
+    "mean_delay_s": 6.6,
+    "median_delay_s": 3.5,
+    "alerts": 9586,
+    "false_alerts": 108,
+    "incidents": 91,
+    "flows": 64646,
+    "avg_window_latency_ms": 248.6,
+    "p95_window_latency_ms": 334.6,
+    "wall_seconds": 663.1
+  },
+  "per_campaign": [
+    {
+      "campaign": 0,
+      "attack": "spoofing",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 2.2,
+      "alerts": 45,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 1,
+      "attack": "reconnaissance",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 4.9,
+      "alerts": 40,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 2,
+      "attack": "data_alteration",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 3.4,
+      "alerts": 156,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 3,
+      "attack": "spoofing",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.6,
+      "alerts": 19,
+      "class_correct": 0.842
+    },
+    {
+      "campaign": 4,
+      "attack": "exfiltration",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 3.7,
+      "alerts": 30,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 5,
+      "attack": "reconnaissance",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 3.5,
+      "alerts": 924,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 6,
+      "attack": "data_alteration",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 4.3,
+      "alerts": 51,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 7,
+      "attack": "dos_flood",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 4.0,
+      "alerts": 42,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 8,
+      "attack": "data_alteration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 5.0,
+      "alerts": 14,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 9,
+      "attack": "data_alteration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 4.8,
+      "alerts": 64,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 10,
+      "attack": "exfiltration",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 39.5,
+      "alerts": 30,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 11,
+      "attack": "data_alteration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.4,
+      "alerts": 110,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 12,
+      "attack": "dos_flood",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.8,
+      "alerts": 50,
+      "class_correct": 0.96
+    },
+    {
+      "campaign": 13,
+      "attack": "spoofing",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 3.5,
+      "alerts": 49,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 14,
+      "attack": "spoofing",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 3.3,
+      "alerts": 34,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 15,
+      "attack": "dos_flood",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 4.6,
+      "alerts": 84,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 16,
+      "attack": "unauthorised_access",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 2.2,
+      "alerts": 20,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 17,
+      "attack": "unauthorised_access",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 1.1,
+      "alerts": 26,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 18,
+      "attack": "unauthorised_access",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 5.3,
+      "alerts": 19,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 19,
+      "attack": "exfiltration",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 38.0,
+      "alerts": 30,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 20,
+      "attack": "reconnaissance",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 2.9,
+      "alerts": 2802,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 21,
+      "attack": "unauthorised_access",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 2.6,
+      "alerts": 13,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 22,
+      "attack": "dos_flood",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 1.2,
+      "alerts": 76,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 23,
+      "attack": "reconnaissance",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 0.9,
+      "alerts": 735,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 24,
+      "attack": "spoofing",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 2.0,
+      "alerts": 46,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 25,
+      "attack": "unauthorised_access",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 2.4,
+      "alerts": 19,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 26,
+      "attack": "reconnaissance",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 2.0,
+      "alerts": 3857,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 27,
+      "attack": "exfiltration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.8,
+      "alerts": 41,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 28,
+      "attack": "exfiltration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 37.5,
+      "alerts": 31,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 29,
+      "attack": "dos_flood",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 0.0,
+      "alerts": 21,
+      "class_correct": 1.0
+    }
+  ]
+}

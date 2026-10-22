@@ -1,0 +1,20 @@
+{
+  "Random Forest": {
+    "n_estimators": 400,
+    "max_depth": null,
+    "min_samples_leaf": 1
+  },
+  "XGBoost": {
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "n_estimators": 500
+  },
+  "MLP": {
+    "hidden_layer_sizes": [
+      256,
+      128,
+      64
+    ],
+    "alpha": 0.0001
+  }
+}

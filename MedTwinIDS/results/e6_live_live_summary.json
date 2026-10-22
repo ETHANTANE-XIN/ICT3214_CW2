@@ -1,0 +1,126 @@
+{
+  "overall": {
+    "campaigns": 12,
+    "detected": 12,
+    "detection_rate": 1.0,
+    "mean_delay_s": 10.1,
+    "median_delay_s": 3.5,
+    "alerts": 4916,
+    "false_alerts": 37,
+    "incidents": 33,
+    "flows": 23159,
+    "avg_window_latency_ms": 246.3,
+    "p95_window_latency_ms": 392.5,
+    "wall_seconds": 194.9
+  },
+  "per_campaign": [
+    {
+      "campaign": 0,
+      "attack": "dos_flood",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.2,
+      "alerts": 40,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 1,
+      "attack": "exfiltration",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 41.0,
+      "alerts": 34,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 2,
+      "attack": "unauthorised_access",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 4.2,
+      "alerts": 26,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 3,
+      "attack": "exfiltration",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 43.3,
+      "alerts": 36,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 4,
+      "attack": "data_alteration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 2.5,
+      "alerts": 89,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 5,
+      "attack": "reconnaissance",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 1.8,
+      "alerts": 3523,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 6,
+      "attack": "data_alteration",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 14.3,
+      "alerts": 80,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 7,
+      "attack": "unauthorised_access",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 1.3,
+      "alerts": 12,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 8,
+      "attack": "spoofing",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 0.2,
+      "alerts": 40,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 9,
+      "attack": "spoofing",
+      "intensity": "high",
+      "detected": true,
+      "delay_s": 0.8,
+      "alerts": 44,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 10,
+      "attack": "reconnaissance",
+      "intensity": "medium",
+      "detected": true,
+      "delay_s": 4.3,
+      "alerts": 903,
+      "class_correct": 1.0
+    },
+    {
+      "campaign": 11,
+      "attack": "dos_flood",
+      "intensity": "low",
+      "detected": true,
+      "delay_s": 3.9,
+      "alerts": 52,
+      "class_correct": 1.0
+    }
+  ]
+}
