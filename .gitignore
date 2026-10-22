@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+build/node_modules/
+build/terminal/*.html
+deliverables/*.zip
+*.part
+*.tmp
+.DS_Store

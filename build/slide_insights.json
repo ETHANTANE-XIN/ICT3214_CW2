@@ -1,0 +1,52 @@
+{
+  "e1": "All three exceed 99.7% accuracy, so accuracy hides the difference; macro F1 does not. XGBoost was chosen on cross-validation (the highest and most stable). On the test run it ties with the MLP (paired bootstrap) and beats Random Forest; on three extra unseen wards it is best 3 times out of 3.",
+  "e1_notes": "Selection used cross-validation only. The 95% bootstrap interval of the macro-F1 difference is 0.053 to 0.074 against Random Forest (a real lead) and -0.003 to 0.005 against the MLP (a tie). On the extra wards the MLP fell to 0.936 once, missing a low-intensity clone spoof. XGBoost also trains fastest (17 s) and needs 0.83 ms per flow; Random Forest is 27x slower per flow and much weaker on integrity attacks.",
+  "confusion": "Random Forest calls 84% of impostor spoofing flows normal; XGBoost and the MLP catch 98% and 97%. The evidence is a few weak twin signals that bagging outvotes and boosting focuses on.",
+  "confusion_notes": "Rows are true classes, columns predictions, normalised per row. Loud attacks are easy for all models. The impostor publishes under a victim's identity; only sequence numbers, the cross-sensor residual and the sender's registry status give it away.",
+  "ablation": "Adding the 11 twin features lifts XGBoost from 0.876 to 0.986 and spoofing recall from 38% to 97%. Raw vitals alone add little: consistency is what matters.",
+  "ablation_notes": "Biometric features alone are nearly useless because the fake vitals are plausible. Network plus biometric, the WUSTL-EHMS-2020 design, is no better than network alone here. The twin features (sequence integrity, monitor versus wearable residual, registry checks) make the difference. Twin features are 20% of the inputs but carry about a quarter of the SHAP attribution.",
+  "zero_title": "Closed-world models miss the unknown",
+  "zero_day": "Trained without one family, supervised recall on it averages only 0.24 (XGBoost). The Isolation Forest reaches 0.75: strong on DoS, scans and exfiltration, weak on spoofing (0.28) and data alteration (0.46). Adding the twin rules closes that gap: all three layers together reach 0.96.",
+  "zero_day_notes": "Each row is a detector, each column an attack family that was removed from training. The hybrid of XGBoost and the Isolation Forest reaches 0.77 at 1.16% FPR; adding the twin rules gives 0.96 at 1.58%. The next slide explains the rules.",
+  "rules": {
+    "spoof": 1.0,
+    "alt": 0.8797169811320755,
+    "fpr": 0.0048426589280856,
+    "hyb": 0.7663458275528262,
+    "hyb3": 0.9621382635408878,
+    "hyb_fpr": 0.011641123303406749,
+    "hyb3_fpr": 0.015812702155315685,
+    "live_fa": 37,
+    "rules_fa": 85,
+    "live_inc": 33,
+    "rules_inc": 55,
+    "q9999_fpr": 0.001160787158792,
+    "q9999_spoof": 0.5969387755102041
+  },
+  "rules_notes": "The rules need no attack labels: each threshold is the 99.9th percentile of its signal in normal training traffic. They are strongest exactly where the learners are weakest, on unseen spoofing (1.00) and data alteration (0.88). The cost is more false alerts: in the live run 37 became 85, so the rules are an option (--twin-rules). At the 99.99th percentile their false positive rate falls to 0.12% but unseen-spoofing recall falls to 0.60.",
+  "n_tests": 17,
+  "sensitivity": "Low-intensity data alteration is the hardest case (XGBoost recall 0.87). Shorter windows detect sooner: mean time-to-detect 10.5 s at 10 s, 6.6 s at 5 s and 5.2 s at 2 s, with macro F1 0.985, 0.986 and 0.945. We keep 5 s.",
+  "sensitivity_notes": "The test run contains no high-intensity spoofing or unauthorised-access campaign, so those bars are missing. Exfiltration raises the mean delay because it is only visible once the upload starts.",
+  "realtime_notes": "Replay of the test run: 30/30 campaigns, median 3.5 s. New live twin: 12/12, median 3.5 s. 4,916 alerts collapse into 33 incidents. Most 'false' alerts are the Isolation Forest, nurse pump pauses, or the healthy wearable of a patient whose monitor is spoofed, which still points at the right bed.",
+  "limitations": [
+    "Simulated data: real devices and attackers vary more, so absolute scores are optimistic",
+    "Twin rules catch unseen integrity attacks but add false alerts",
+    "Nurse pump pauses can look like rogue commands",
+    "Flow labels can disagree with bed-level reality",
+    "WUSTL-EHMS-2020 benchmark script ready but not yet run"
+  ],
+  "future": [
+    "Validate on real captures and WUSTL-EHMS-2020",
+    "Calibrate twin rules per device to cut false alerts",
+    "Feed command source and clinical orders into pump features",
+    "Online sequence models (autoencoder ensembles)",
+    "Clinician-approved automatic isolation of high-risk devices"
+  ],
+  "conclusion": [
+    "RQ1: the ward twin generates exactly labelled, controllable IoMT data",
+    "RQ2: XGBoost gives the best balance (macro F1 0.986, 0.83 ms per flow)",
+    "RQ3: twin features lift spoofing recall from 38% to 97%",
+    "RQ4: Isolation Forest plus twin rules lift unseen-attack recall from 0.24 to 0.96",
+    "RQ5: all 30 test campaigns detected in real time, median 3.5 s"
+  ]
+}

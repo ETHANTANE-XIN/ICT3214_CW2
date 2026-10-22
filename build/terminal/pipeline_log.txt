@@ -1,0 +1,109 @@
+[train] seed=7 hours=6.0 start=08:00
+[train] packets=1,504,385 flows=126,777 attack flows=16,960
+attack
+normal                 109817
+reconnaissance          14455
+data_alteration          1030
+dos_flood                 543
+spoofing                  378
+exfiltration              335
+unauthorised_access       219
+[test] seed=2026 hours=3.0 start=20:00
+[test] packets=652,117 flows=64,646 attack flows=9,511
+attack
+normal                 55135
+reconnaissance          8358
+data_alteration          424
+dos_flood                274
+spoofing                 196
+exfiltration             162
+unauthorised_access       97
+train flows 126,777 | test flows 64,646
+  tune Random Forest {'n_estimators': 200, 'max_depth': None, 'min_samples_leaf': 1} -> val macro-F1 0.8714
+  tune Random Forest {'n_estimators': 200, 'max_depth': None, 'min_samples_leaf': 3} -> val macro-F1 0.8629
+  tune Random Forest {'n_estimators': 200, 'max_depth': 24, 'min_samples_leaf': 1} -> val macro-F1 0.8724
+  tune Random Forest {'n_estimators': 200, 'max_depth': 24, 'min_samples_leaf': 3} -> val macro-F1 0.8682
+  tune Random Forest {'n_estimators': 400, 'max_depth': None, 'min_samples_leaf': 1} -> val macro-F1 0.8757
+  tune Random Forest {'n_estimators': 400, 'max_depth': None, 'min_samples_leaf': 3} -> val macro-F1 0.8644
+  tune Random Forest {'n_estimators': 400, 'max_depth': 24, 'min_samples_leaf': 1} -> val macro-F1 0.8757
+  tune Random Forest {'n_estimators': 400, 'max_depth': 24, 'min_samples_leaf': 3} -> val macro-F1 0.8658
+  tune XGBoost       {'max_depth': 6, 'learning_rate': 0.1, 'n_estimators': 300} -> val macro-F1 0.8692
+  tune XGBoost       {'max_depth': 6, 'learning_rate': 0.1, 'n_estimators': 500} -> val macro-F1 0.8685
+  tune XGBoost       {'max_depth': 6, 'learning_rate': 0.05, 'n_estimators': 300} -> val macro-F1 0.8796
+  tune XGBoost       {'max_depth': 6, 'learning_rate': 0.05, 'n_estimators': 500} -> val macro-F1 0.8899
+  tune XGBoost       {'max_depth': 10, 'learning_rate': 0.1, 'n_estimators': 300} -> val macro-F1 0.8688
+  tune XGBoost       {'max_depth': 10, 'learning_rate': 0.1, 'n_estimators': 500} -> val macro-F1 0.8682
+  tune XGBoost       {'max_depth': 10, 'learning_rate': 0.05, 'n_estimators': 300} -> val macro-F1 0.8811
+  tune XGBoost       {'max_depth': 10, 'learning_rate': 0.05, 'n_estimators': 500} -> val macro-F1 0.8841
+  tune MLP           {'hidden_layer_sizes': (128, 64, 32), 'alpha': 0.0001} -> val macro-F1 0.8802
+  tune MLP           {'hidden_layer_sizes': (128, 64, 32), 'alpha': 0.001} -> val macro-F1 0.8709
+  tune MLP           {'hidden_layer_sizes': (256, 128, 64), 'alpha': 0.0001} -> val macro-F1 0.8852
+  tune MLP           {'hidden_layer_sizes': (256, 128, 64), 'alpha': 0.001} -> val macro-F1 0.8717
+hyperparameters: {'Random Forest': {'n_estimators': 400, 'max_depth': None, 'min_samples_leaf': 1}, 'XGBoost': {'max_depth': 6, 'learning_rate': 0.05, 'n_estimators': 500}, 'MLP': {'hidden_layer_sizes': (256, 128, 64), 'alpha': 0.0001}}
+  CV fold 1 Random Forest macro-F1 0.9892 binary-F1 0.9979
+  CV fold 1 XGBoost       macro-F1 0.9771 binary-F1 0.9964
+  CV fold 1 MLP           macro-F1 0.9592 binary-F1 0.9939
+  CV fold 2 Random Forest macro-F1 0.8820 binary-F1 0.9784
+  CV fold 2 XGBoost       macro-F1 0.9348 binary-F1 0.9822
+  CV fold 2 MLP           macro-F1 0.8725 binary-F1 0.9828
+  CV fold 3 Random Forest macro-F1 0.9631 binary-F1 0.9793
+  CV fold 3 XGBoost       macro-F1 0.9904 binary-F1 0.9948
+  CV fold 3 MLP           macro-F1 0.9594 binary-F1 0.9780
+  CV fold 4 Random Forest macro-F1 0.9403 binary-F1 0.9866
+  CV fold 4 XGBoost       macro-F1 0.9535 binary-F1 0.9896
+  CV fold 4 MLP           macro-F1 0.9563 binary-F1 0.9896
+  CV fold 5 Random Forest macro-F1 0.9193 binary-F1 0.9888
+  CV fold 5 XGBoost       macro-F1 0.9270 binary-F1 0.9954
+  CV fold 5 MLP           macro-F1 0.9632 binary-F1 0.9936
+TEST Random Forest acc 0.9971 P 0.9996 R 0.9810 F1 0.9902 macroF1 0.9230 AUC 1.0000 train 20.5s
+TEST XGBoost       acc 0.9992 P 0.9984 R 0.9964 F1 0.9974 macroF1 0.9863 AUC 1.0000 train 17.3s
+TEST MLP           acc 0.9990 P 0.9962 R 0.9968 F1 0.9965 macroF1 0.9849 AUC 0.9999 train 50.1s
+
+Selected model: XGBoost
+               accuracy  precision  recall      f1     fpr  roc_auc  mc_accuracy  macro_precision  macro_recall  macro_f1  weighted_f1  train_s  infer_us_per_flow  latency_ms    size_kb  cv_macro_f1  cv_macro_f1_sd   cv_f1  cv_f1_sd  selected
+model                                                                                                                                                                                                                                             
+Random Forest    0.9971     0.9996  0.9810  0.9902  0.0001   1.0000       0.9971           0.9913        0.8903    0.9230       0.9967  20.4683             6.6864     22.8940  6755.4219       0.9388          0.0411  0.9862    0.0079     False
+XGBoost          0.9992     0.9984  0.9964  0.9974  0.0003   1.0000       0.9992           0.9892        0.9837    0.9863       0.9992  17.3009             9.6057      0.8338   932.1514       0.9565          0.0270  0.9917    0.0059      True
+MLP              0.9990     0.9962  0.9968  0.9965  0.0007   0.9999       0.9990           0.9827        0.9873    0.9849       0.9990  50.1303             1.9917      0.4017   627.0713       0.9421          0.0390  0.9876    0.0070     False
+runtime assets saved: {'standard_threshold': -0.6343934571502289, 'strict_threshold': -0.6962320725533985}
+           XGBoost_SHAP  RandomForest_Gini
+group                                     
+biometric         0.111              0.068
+network           0.657              0.755
+twin              0.232              0.177
+  E2 network_only       Random Forest macro-F1 0.8571 binary-F1 0.9640
+  E2 network_only       XGBoost       macro-F1 0.8798 binary-F1 0.9751
+  E2 network_only       MLP           macro-F1 0.8704 binary-F1 0.9724
+  E2 biometric_only     Random Forest macro-F1 0.1332 binary-F1 0.6520
+  E2 biometric_only     XGBoost       macro-F1 0.2552 binary-F1 0.7444
+  E2 biometric_only     MLP           macro-F1 0.2497 binary-F1 0.7806
+  E2 network_biometric  Random Forest macro-F1 0.8449 binary-F1 0.9642
+  E2 network_biometric  XGBoost       macro-F1 0.8761 binary-F1 0.9776
+  E2 network_biometric  MLP           macro-F1 0.8753 binary-F1 0.9697
+  E2 full_twin          Random Forest macro-F1 0.9230 binary-F1 0.9902
+  E2 full_twin          XGBoost       macro-F1 0.9863 binary-F1 0.9974
+  E2 full_twin          MLP           macro-F1 0.9849 binary-F1 0.9965
+  E3 held-out dos_flood            Random Forest recall 0.197
+  E3 held-out dos_flood            XGBoost       recall 0.088
+  E3 held-out dos_flood            MLP           recall 0.536
+  E3 held-out spoofing             Random Forest recall 0.015
+  E3 held-out spoofing             XGBoost       recall 0.122
+  E3 held-out spoofing             MLP           recall 0.097
+  E3 held-out data_alteration      Random Forest recall 0.000
+  E3 held-out data_alteration      XGBoost       recall 0.000
+  E3 held-out data_alteration      MLP           recall 0.005
+  E3 held-out unauthorised_access  Random Forest recall 0.247
+  E3 held-out unauthorised_access  XGBoost       recall 0.371
+  E3 held-out unauthorised_access  MLP           recall 0.000
+  E3 held-out reconnaissance       Random Forest recall 0.000
+  E3 held-out reconnaissance       XGBoost       recall 0.021
+  E3 held-out reconnaissance       MLP           recall 0.001
+  E3 held-out exfiltration         Random Forest recall 0.000
+  E3 held-out exfiltration         XGBoost       recall 0.864
+  E3 held-out exfiltration         MLP           recall 0.000
+  E5 W= 2.0s macro-F1 0.9447 detected 1.000 mean delay 5.2s
+  E5 W= 5.0s macro-F1 0.9863 detected 1.000 mean delay 6.6s
+  E5 W=10.0s macro-F1 0.9851 detected 1.000 mean delay 10.5s
+CHAIN_DONE
+
+[exited with code 0]

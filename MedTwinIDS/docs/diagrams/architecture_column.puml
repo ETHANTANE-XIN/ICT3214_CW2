@@ -1,0 +1,81 @@
+@startuml architecture_column
+!pragma layout smetana
+skinparam dpi 260
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam ArrowColor #37474F
+skinparam ArrowFontSize 12
+skinparam nodesep 18
+skinparam ranksep 26
+skinparam rectangle {
+  BorderColor #455A64
+  FontSize 13
+}
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #455A64
+}
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #455A64
+}
+hide stereotype
+top to bottom direction
+
+rectangle "1. Ward digital twin" as DT #E3F2FD {
+  component "Patient\nphysiology" as PHY
+  component "Medical\ndevices" as DEV
+  component "Network\npackets" as NET
+  component "Attack\ninjector" as ATK
+}
+
+rectangle "2. Data engineering" as DE #E8F5E9 {
+  database "Packet log\n+ labels" as RAW
+  component "Parser and\ncleaner" as PAR
+  database "Flow features\n(55)" as FEAT
+}
+
+rectangle "3. ML / AI models" as ML #FFF3E0 {
+  component "Random\nForest" as RF
+  component "XGBoost" as XGB
+  component "MLP" as MLP
+  component "Isolation\nForest" as IF
+  component "Selection by\ntime-blocked CV" as SEL
+}
+
+rectangle "4. Real-time response" as RT #FCE4EC {
+  component "Stream\ndetector" as DET
+  component "Risk\nengine" as RISK
+  component "Incidents and\nexplanations" as ALR
+}
+
+rectangle "5. Dashboard" as UI #EDE7F6 {
+  component "Live ward map\nand evaluation" as DASH
+}
+
+PHY -right-> DEV : 1a
+DEV -right-> NET : 1b
+ATK -up-> NET : 1c
+NET -down-> RAW : 2a
+RAW -right-> PAR : 2b
+PAR -right-> FEAT : 2c
+FEAT -down-> RF : 3a
+FEAT -down-> XGB : 3a
+FEAT -down-> MLP : 3a
+FEAT -down-> IF : 3b
+RF -down-> SEL
+XGB -down-> SEL
+MLP -down-> SEL
+SEL -down-> DET : 4a
+IF -down-> DET : 4b
+DET -right-> RISK : 4c
+RISK -right-> ALR : 4d
+ALR -down-> DASH : 5
+PHY -[hidden]down-> RAW
+ATK -[hidden]down-> RAW
+RAW -[hidden]down-> RF
+RF -[hidden]down-> DET
+DET -[hidden]down-> DASH
+@enduml

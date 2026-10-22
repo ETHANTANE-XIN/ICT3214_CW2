@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.7.0 -- /usr/bin/python
+cachedir: .pytest_cache
+rootdir: /home/user/ICT3214_CW2/MedTwinIDS
+plugins: anyio-4.15.1
+collecting ... collected 17 items
+
+tests/test_medtwin.py::test_twin_is_deterministic PASSED                 [  5%]
+tests/test_medtwin.py::test_every_family_is_scheduled_and_labelled PASSED [ 11%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[3] PASSED [ 17%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[8] PASSED [ 23%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[20] PASSED [ 29%]
+tests/test_medtwin.py::test_cleaner_handles_capture_artefacts PASSED     [ 35%]
+tests/test_medtwin.py::test_scan_to_high_port_is_oriented_by_the_syn PASSED [ 41%]
+tests/test_medtwin.py::test_features_are_complete_and_identifier_free PASSED [ 47%]
+tests/test_medtwin.py::test_streaming_extraction_matches_batch PASSED    [ 52%]
+tests/test_medtwin.py::test_rogue_pump_command_raises_pump_rate_delta PASSED [ 58%]
+tests/test_medtwin.py::test_twin_rules_fire_on_violations_only PASSED    [ 64%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[Random Forest] PASSED [ 70%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[XGBoost] PASSED [ 76%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[MLP] PASSED [ 82%]
+tests/test_medtwin.py::test_risk_engine_protects_impersonated_devices_and_tracks_rogue_hosts PASSED [ 88%]
+tests/test_medtwin.py::test_benchmark_loader_matches_wustl_schema PASSED [ 94%]
+tests/test_medtwin.py::test_realtime_detector_end_to_end PASSED          [100%]
+
+======================== 17 passed in 77.11s (0:01:17) =========================

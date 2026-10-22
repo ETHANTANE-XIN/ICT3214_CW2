@@ -1,0 +1,118 @@
+MedTwin-IDS live detector | model=XGBoost | window=5s | speed x0.0
+[96m[14:04:45] ALERT anomaly_unknown      dev=WS-02    p=0.50 risk= 24.0 | dMinPktSz=1514.0, SrcBytes=13817.0, SrcLoad=22107.2[0m
+[96m[14:04:50] ALERT data_alteration      dev=WRB-01   p=0.60 risk= 50.5 | VitalsDelta=8.55, TwinResidualHR=6.607, VitalsStd=5.749[0m
+[93m[14:05:35] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=47.0, DstJitter=194.824, Rate=19.0[0m
+[93m[14:05:35] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.6 | SynCnt=33.0, DstJitter=174.589, Rate=14.4[0m
+[93m[14:05:40] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=53.0, Rate=21.4, TotPkts=107.0[0m
+[93m[14:05:40] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=62.0, Rate=25.4, TotPkts=127.0[0m
+[93m[14:05:45] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=71.0, Rate=28.4, TotPkts=142.0[0m
+[93m[14:05:45] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=61.0, Rate=24.4, TotPkts=122.0[0m
+[93m[14:05:50] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=63.0, Rate=25.6, TotPkts=128.0[0m
+[93m[14:05:50] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=53.0, Rate=21.4, TotPkts=107.0[0m
+[93m[14:05:55] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=48.0, DstJitter=128.589, Rate=19.6[0m
+[93m[14:05:55] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=63.0, Rate=26.4, TotPkts=132.0[0m
+[93m[14:06:00] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=68.0, Rate=27.8, TotPkts=139.0[0m
+[93m[14:06:00] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=64.0, Rate=25.8, TotPkts=129.0[0m
+[93m[14:06:05] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=69.0, Rate=28.0, TotPkts=140.0[0m
+[93m[14:06:05] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=50.0, Rate=20.2, SrcPkts=55.0[0m
+[93m[14:06:10] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=78.0, Rate=32.0, TotPkts=160.0[0m
+[93m[14:06:10] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=54.0, Rate=22.4, TotPkts=112.0[0m
+[93m[14:06:15] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=57.0, Rate=23.0, TotPkts=115.0[0m
+[93m[14:06:15] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=72.0, SrcPkts=77.0, Rate=27.2[0m
+[93m[14:06:20] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=74.0, Rate=28.8, SrcPkts=79.0[0m
+[93m[14:06:20] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=67.0, Rate=26.2, SrcPkts=72.0[0m
+[93m[14:06:25] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=57.0, Rate=23.2, TotPkts=116.0[0m
+[93m[14:06:25] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=54.0, Rate=22.0, TotPkts=110.0[0m
+[93m[14:06:30] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=61.0, Rate=24.4, TotPkts=122.0[0m
+[93m[14:06:30] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=53.0, Rate=21.2, SrcPkts=58.0[0m
+[93m[14:06:35] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=64.0, Rate=25.4, SrcPkts=69.0[0m
+[93m[14:06:35] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=65.0, Rate=26.6, TotPkts=133.0[0m
+[93m[14:06:40] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=70.0, Rate=26.6, SrcPkts=75.0[0m
+[93m[14:06:40] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=75.0, Rate=29.4, SrcPkts=80.0[0m
+[93m[14:06:45] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=53.0, Rate=22.2, TotPkts=111.0[0m
+[93m[14:06:45] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=65.0, Rate=25.8, TotPkts=129.0[0m
+[93m[14:06:50] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=59.0, Rate=24.2, TotPkts=121.0[0m
+[93m[14:06:50] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=60.0, SrcPkts=65.0, Rate=23.0[0m
+[93m[14:06:55] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=69.0, Rate=27.2, SrcPkts=74.0[0m
+[93m[14:06:55] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=62.0, Rate=25.0, TotPkts=125.0[0m
+[93m[14:07:00] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=52.0, Rate=21.4, TotPkts=107.0[0m
+[93m[14:07:00] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=62.0, Rate=25.6, TotPkts=128.0[0m
+[93m[14:07:05] ALERT dos_flood            dev=MON-03   p=1.00 risk= 76.7 | SynCnt=59.0, Rate=23.6, TotPkts=118.0[0m
+[93m[14:07:05] ALERT dos_flood            dev=MON-07   p=1.00 risk= 76.7 | SynCnt=55.0, Rate=23.4, TotPkts=117.0[0m
+[93m[14:07:10] ALERT dos_flood            dev=MON-03   p=0.99 risk= 76.0 | SynCnt=23.0, DstJitter=274.958, Rate=10.6[0m
+[93m[14:07:10] ALERT dos_flood            dev=MON-07   p=0.99 risk= 76.3 | SynCnt=23.0, DstJitter=304.04, SrcJitter=303.79[0m
+[91m[14:09:30] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=63702.0, SrcLoad=101923.2, SynCnt=1.0[0m
+[91m[14:09:35] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=617712.0, SrcLoad=988339.2, SrcPkts=408.0[0m
+[91m[14:09:40] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=564722.0, SrcLoad=903555.2, SrcPkts=373.0[0m
+[91m[14:09:45] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=652534.0, SrcLoad=1044054.4, SrcPkts=431.0[0m
+[91m[14:09:50] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=687356.0, SrcLoad=1099769.6, SrcPkts=454.0[0m
+[91m[14:09:55] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=641936.0, SrcLoad=1027097.6, SrcPkts=424.0[0m
+[91m[14:10:00] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=655562.0, SrcLoad=1048899.2, SrcPkts=433.0[0m
+[91m[14:10:05] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=629824.0, SrcLoad=1007718.4, SrcPkts=416.0[0m
+[91m[14:10:10] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=637394.0, SrcLoad=1019830.4, SrcPkts=421.0[0m
+[91m[14:10:15] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=613170.0, SrcLoad=981072.0, SrcPkts=405.0[0m
+[91m[14:10:20] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=614684.0, SrcLoad=983494.4, SrcPkts=406.0[0m
+[91m[14:10:25] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=651020.0, SrcLoad=1041632.0, SrcPkts=430.0[0m
+[91m[14:10:30] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=682814.0, SrcLoad=1092502.4, SrcPkts=451.0[0m
+[91m[14:10:35] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=605600.0, SrcLoad=968960.0, SrcPkts=400.0[0m
+[91m[14:10:40] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=595002.0, SrcLoad=952003.2, SrcPkts=393.0[0m
+[91m[14:10:45] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=647992.0, SrcLoad=1036787.2, SrcPkts=428.0[0m
+[91m[14:10:50] ALERT exfiltration         dev=GW-01    p=1.00 risk= 91.3 | SrcBytes=663132.0, SrcLoad=1061011.2, SrcPkts=438.0[0m
+[91m[14:10:50] ALERT unauthorised_access  dev=PMP-06   p=0.91 risk= 91.3 | PumpRateDelta=2.5, MqttCmd=1.0, sMinPktSz=58.0[0m
+[91m[14:10:55] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=614684.0, SrcLoad=983494.4, SrcPkts=406.0[0m
+[91m[14:11:00] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=617712.0, SrcLoad=988339.2, SrcPkts=408.0[0m
+[91m[14:11:05] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=667674.0, SrcLoad=1068278.4, SrcPkts=441.0[0m
+[91m[14:11:10] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=591974.0, SrcLoad=947158.4, SrcPkts=391.0[0m
+[91m[14:11:15] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=569264.0, SrcLoad=910822.4, SrcPkts=376.0[0m
+[91m[14:11:20] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=637394.0, SrcLoad=1019830.4, SrcPkts=421.0[0m
+[91m[14:11:25] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=573806.0, SrcLoad=918089.6, SrcPkts=379.0[0m
+[91m[14:11:30] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=617712.0, SrcLoad=988339.2, SrcPkts=408.0[0m
+[91m[14:11:35] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=602572.0, SrcLoad=964115.2, SrcPkts=398.0[0m
+[91m[14:11:40] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=623768.0, SrcLoad=998028.8, SrcPkts=412.0[0m
+[91m[14:11:45] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=613170.0, SrcLoad=981072.0, SrcPkts=405.0[0m
+[91m[14:11:50] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=666160.0, SrcLoad=1065856.0, SrcPkts=440.0[0m
+[91m[14:11:55] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=554124.0, SrcLoad=886598.4, SrcPkts=366.0[0m
+[91m[14:12:00] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=579862.0, SrcLoad=927779.2, SrcPkts=383.0[0m
+[91m[14:12:05] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=635880.0, SrcLoad=1017408.0, SrcPkts=420.0[0m
+[91m[14:12:10] ALERT exfiltration         dev=GW-01    p=1.00 risk= 90.0 | SrcBytes=628310.0, SrcLoad=1005296.0, SrcPkts=415.0[0m
+[91m[14:12:15] ALERT exfiltration         dev=GW-01    p=1.00 risk= 89.9 | SrcBytes=36336.0, SrcLoad=58137.6, sMinPktSz=1514.0[0m
+[91m[14:13:15] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=27.0, MqttConnect=27.0, SynCnt=27.0[0m
+[91m[14:13:20] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=50.0, MqttConnect=50.0, SynCnt=50.0[0m
+[91m[14:13:25] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=42.0, MqttConnect=42.0, SynCnt=42.0[0m
+[91m[14:13:30] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=41.0, MqttConnect=41.0, SynCnt=41.0[0m
+[91m[14:13:35] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=31.0, MqttConnect=31.0, SynCnt=31.0[0m
+[91m[14:13:40] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=37.0, MqttConnect=37.0, SynCnt=37.0[0m
+[91m[14:13:45] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=31.0, MqttConnect=31.0, SynCnt=31.0[0m
+[91m[14:13:50] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=34.0, MqttConnect=34.0, SynCnt=34.0[0m
+[91m[14:13:55] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=42.0, MqttConnect=42.0, SynCnt=42.0[0m
+[91m[14:14:00] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=42.0, MqttConnect=42.0, SynCnt=42.0[0m
+[91m[14:14:05] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=37.0, MqttConnect=37.0, SynCnt=37.0[0m
+[91m[14:14:10] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=40.0, MqttConnect=40.0, SynCnt=40.0[0m
+[91m[14:14:15] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=42.0, MqttConnect=42.0, SynCnt=42.0[0m
+[91m[14:14:20] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=38.0, MqttConnect=38.0, SynCnt=38.0[0m
+[91m[14:14:25] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=43.0, MqttConnect=43.0, SynCnt=43.0[0m
+[91m[14:14:30] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=48.0, MqttConnect=48.0, SynCnt=49.0[0m
+[91m[14:14:35] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=34.0, MqttConnect=34.0, SynCnt=33.0[0m
+[91m[14:14:40] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=37.0, MqttConnect=37.0, SynCnt=37.0[0m
+[91m[14:14:45] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=31.0, MqttConnect=31.0, SynCnt=31.0[0m
+[91m[14:14:50] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=42.0, MqttConnect=42.0, SynCnt=42.0[0m
+[91m[14:14:55] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=37.0, MqttConnect=37.0, SynCnt=37.0[0m
+[91m[14:15:00] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=51.0, MqttConnect=51.0, SynCnt=51.0[0m
+[91m[14:15:05] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 88.0 | MqttConnFail=24.0, MqttConnect=25.0, SynCnt=25.0[0m
+[91m[14:15:15] ALERT unauthorised_access  dev=PMP-03   p=0.94 risk= 93.8 | PumpRateDelta=69.353, MqttCmd=1.0, SIntPkt=2827.16[0m
+[91m[14:15:15] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=1.00 risk= 87.9 | PumpRateDelta=69.353, MqttCmd=1.0, MqttPublish=0.0[0m
+[91m[14:15:30] ALERT unauthorised_access  dev=UNKNOWN 10.10.9.66 p=0.93 risk= 82.2 | MqttCmd=1.0, PumpRateDelta=0.201, MqttPublish=0.0[0m
+{
+  "campaigns": 3,
+  "detected": 3,
+  "detection_rate": 1.0,
+  "mean_delay_s": 16.1,
+  "median_delay_s": 4.2,
+  "alerts": 103,
+  "false_alerts": 3,
+  "incidents": 8,
+  "flows": 4984,
+  "avg_window_latency_ms": 258.6,
+  "p95_window_latency_ms": 322.1,
+  "wall_seconds": 54.0
+}

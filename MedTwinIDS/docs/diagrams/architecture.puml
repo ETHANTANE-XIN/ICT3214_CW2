@@ -1,0 +1,74 @@
+@startuml architecture
+!pragma layout smetana
+skinparam dpi 200
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam ArrowColor #37474F
+skinparam ArrowFontSize 11
+skinparam rectangle {
+  BorderColor #455A64
+}
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #455A64
+}
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #455A64
+}
+top to bottom direction
+
+rectangle "1. Ward Digital Twin (simulation)" as DT #E3F2FD {
+  component "Patient physiology\n(OU vital signs,\nclinical episodes)" as PHY
+  component "Device layer\n8 monitors, 8 pumps,\n8 wearables" as DEV
+  component "Network layer\nMQTT, HL7, HTTPS,\nARP packet events" as NET
+  component "Attack injector\n6 classes x\n3 intensities" as ATK
+}
+
+rectangle "2. Data Engineering" as DE #E8F5E9 {
+  database "Raw packet log\n+ ground truth" as RAW
+  component "Parser and cleaner\n(5 s flow windows)" as PAR
+  database "Flow dataset\n55 features" as FEAT
+}
+
+rectangle "3. ML / AI Models" as ML #FFF3E0 {
+  component "Random\nForest" as RF
+  component "XGBoost" as XGB
+  component "MLP" as MLP
+  component "Isolation Forest\n+ twin rules\n(normal only)" as IF
+  component "Model selection\n(time-blocked CV)" as SEL
+}
+
+rectangle "4. Real-time Response" as RT #FCE4EC {
+  component "Stream detector" as DET
+  component "Risk engine\n(severity x criticality)" as RISK
+  component "Incidents, explanations,\nplaybook actions" as ALR
+}
+
+rectangle "5. Analyst Dashboard (Streamlit)" as UI #EDE7F6 {
+  component "Live ward map, evaluation,\nexperiments, explainability" as DASH
+}
+
+PHY -right-> DEV : (1a)
+DEV -right-> NET : (1b)
+ATK -left-> NET : (1c)
+NET -down-> RAW : (2a)
+RAW -right-> PAR : (2b)
+PAR -right-> FEAT : (2c)
+FEAT -down-> RF : (3a)
+FEAT -down-> XGB : (3a)
+FEAT -down-> MLP : (3a)
+FEAT -down-> IF : (3b)
+RF -down-> SEL
+XGB -down-> SEL
+MLP -down-> SEL
+SEL -down-> DET : (4a)
+IF -down-> DET : (4b)
+PHY -[hidden]down-> RAW
+RAW -[hidden]down-> RF
+DET -right-> RISK : (4c)
+RISK -right-> ALR : (4d)
+ALR -down-> DASH : (5)
+@enduml
