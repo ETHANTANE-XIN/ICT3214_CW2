@@ -17,7 +17,7 @@ from . import config as C
 INTENSITY_PARAMS = {
     "dos_flood": {"low": 25.0, "medium": 80.0, "high": 250.0},          # packets/s
     "spoofing": {"low": 1.0, "medium": 2.0, "high": 4.0},               # publish-rate multiplier
-    "data_alteration": {"low": 0.2, "medium": 1.0, "high": 3.0},        # ARP replies/s
+    "data_alteration": {"low": 0.2, "medium": 1.0, "high": 3.0},        # poisoning rounds/s (2 forged replies per victim per round)
     "unauthorised_access": {"low": 0.5, "medium": 2.0, "high": 8.0},    # login attempts/s
     "reconnaissance": {"low": 0.5, "medium": 4.0, "high": 20.0},        # probes/s
     "exfiltration": {"low": 15e3, "medium": 1.2e5, "high": 4e5},        # bytes/s
@@ -26,6 +26,7 @@ HR_OFFSET = {"low": (6, 10), "medium": (15, 25), "high": (40, 60)}
 SPO2_OFFSET = {"low": (1, 2), "medium": (3, 5), "high": (8, 12)}
 SCAN_PORTS = [21, 22, 23, 80, 104, 161, 443, 502, 1883, 2575, 3389, 5900, 8080, 8883]
 UNUSED_IPS = [f"10.10.1.{i}" for i in range(100, 120)] + [f"10.10.2.{i}" for i in range(100, 110)]
+WARD_SUBNET = "10.10.0.0/16"  # address range swept by reconnaissance
 
 
 # --------------------------------------------------------------------------
@@ -124,12 +125,15 @@ def schedule_campaigns(tw) -> list[dict]:
 def campaign_table(camps) -> pd.DataFrame:
     rows = []
     for c in camps:
-        who = c.get("attacker") or (c.get("sources") or [{}])[0]
+        # every flooding source is listed (';'-separated); the other families have a single attacker
+        who = [c["attacker"]] if c.get("attacker") else (c.get("sources") or [{}])
+        target = (c.get("victim") or ",".join(c.get("victims", [])) or (f"PMP-{c['bed']:02d}" if "bed" in c else None)
+                  or (WARD_SUBNET if c["type"] == "reconnaissance" else c.get("dst", C.BROKER_IP)))
         rows.append(dict(campaign=c["id"], attack=c["type"], intensity=c["intensity"], start=round(c["start"], 2),
                          end=round(c["end"], 2), duration=round(c["end"] - c["start"], 1),
-                         source_ip=who.get("ip", ""), source_kind=who.get("kind", ""),
-                         variant=c.get("variant", c.get("mode", "")),
-                         target=c.get("victim") or ",".join(c.get("victims", [])) or (f"PMP-{c['bed']:02d}" if "bed" in c else c.get("dst", C.BROKER_IP))))
+                         source_ip=";".join(w.get("ip", "") for w in who),
+                         source_kind=";".join(w.get("kind", "") for w in who),
+                         variant=c.get("variant", c.get("mode", "")), target=target))
     return pd.DataFrame(rows)
 
 
@@ -157,6 +161,13 @@ def in_path_effect(tw, camps, d, ts):
                 ttl_drop=c["ttl_drop"], delay=float(tw.rng.uniform(*c["delay"])),
                 jitter=float(abs(tw.rng.normal(0, c["jitter_sd"]))),
                 attack="data_alteration", campaign=c["id"], intensity=c["intensity"])
+    # client-ID takeover: the victim's own session carries the hijacked identity (and its sequence
+    # anomalies), so it is labelled like a clone; label only, no vitals or timing change
+    for c in camps:
+        if (c["type"] == "spoofing" and c["variant"] == "takeover" and d.device_id == c["victim"]
+                and c["start"] <= ts < c["end"]):
+            return dict(alter=lambda v: v, ttl_drop=0, delay=0.0, jitter=0.0,
+                        attack="spoofing", campaign=c["id"], intensity=c["intensity"])
     return None
 
 
@@ -257,8 +268,9 @@ def _mitm(tw, c, a, b, t0, t1, buf, states, kw):
     for t in _poisson_times(rng, a, b, c["rate"]):
         for vid in c["victims"]:
             v = tw.by_id[vid]
+            # same capture lengths as benign ARP in each direction (gateway 42, padded device reply 60)
             buf.add(float(t), C.BROKER_IP, v.ip, att["mac"], 0, 0, "ARP", "", 42, 0, **kw)
-            buf.add(float(t) + 0.001, v.ip, C.BROKER_IP, att["mac"], 0, 0, "ARP", "", 42, 0, **kw)
+            buf.add(float(t) + 0.001, v.ip, C.BROKER_IP, att["mac"], 0, 0, "ARP", "", 60, 0, **kw)
 
 
 def _brute(tw, c, a, b, t0, t1, buf, states, kw):
@@ -271,11 +283,13 @@ def _brute(tw, c, a, b, t0, t1, buf, states, kw):
     for tc in c["cmd_times"]:
         if a <= tc < b and tc not in c["cmd_done"]:
             c["cmd_done"].append(tc)
-            cur = tw.pump_rate[c["bed"]]
+            # setpoints derive from the pre-attack rate (no compounding); the twin restores it afterwards
+            base = c.setdefault("base_rate", tw.pump_rate[c["bed"]])
             if c["intensity"] == "low":
-                new = round(max(cur, 20.0) * float(rng.uniform(1.4, 1.8)), 1)
+                new = round(max(base, 20.0) * float(rng.uniform(1.4, 1.8)), 1)
             elif c["intensity"] == "medium":
-                new = round(max(cur, 20.0) * float(rng.uniform(2.5, 4.0)), 1)
+                # below high's 400 floor; the cap varies so that it is not a constant the models could learn
+                new = round(min(max(base, 20.0) * float(rng.uniform(2.5, 4.0)), float(rng.uniform(330, 390))), 1)
             else:
                 new = float(rng.choice([0.0, float(rng.uniform(400, 999))]))
             tw._emit_pump_command(buf, tc, c["bed"], malicious=True, src_ip=att["ip"], src_mac=att["mac"],

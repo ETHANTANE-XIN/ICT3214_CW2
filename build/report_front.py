@@ -100,14 +100,15 @@ def methods(d, C, ctx):
     d.p("**Attacks.** Campaigns of 60 to 240 s are placed at random times, cycling through six families (Table II). "
         "Each is drawn at low, medium or high intensity and from a rogue host, a compromised workstation or a "
         "compromised device, so the same family appears with different footprints. During floods the gateway slows "
-        "down, which also changes legitimate traffic.")
+        "down, which also changes legitimate traffic, and 30 to 90 s after an unauthorised pump command a nurse "
+        "restores the pump's original rate.")
     d.table("Attack Families and Intensity Settings",
             ["Class", "Network and clinical footprint", "Low / medium / high"],
             [["DoS flood", "SYN or MQTT PUBLISH flood on the gateway from 1 to 3 sources", "25 / 80 / 250 pkt/s"],
              ["Spoofing", "MQTT client-ID takeover, or IP (and optionally MAC) clone; false or masked vitals",
               "1x / 2x / 4x rate"],
-             ["Data alteration", "ARP poisoning; vitals offset in transit; extra delay, TTL may drop by one",
-              "0.2 / 1 / 3 ARP/s"],
+             ["Data alteration", "ARP poisoning (two forged replies per victim per round); vitals offset in transit; "
+              "extra delay, TTL may drop by one", "0.2 / 1 / 3 rounds/s"],
              ["Unauth. access", "MQTT credential guessing, then rogue infusion-rate command", "0.5 / 2 / 8 tries/s"],
              ["Reconnaissance", "Host and port scan of the ward subnet", "0.5 / 4 / 20 probes/s"],
              ["Exfiltration", "EHR records staged, then uploaded to an external host", "15 / 120 / 400 kB/s"]],
@@ -137,7 +138,7 @@ def methods(d, C, ctx):
         f"{rz['firmware']} firmware updates, {rz['reboot']} reboots and {rz['pump']} nurse pump commands, so benign "
         "anomalies are common rather than exceptional.")
     d.p(f"**Training and detecting data.** The initial training data is the training run's {tr['flows']:,} flow "
-        "windows: its first 75% fit and its last 25% validate the hyperparameter search, and all of it is used for "
+        "windows: about its first three quarters fit and the rest validates the hyperparameter search, and all of it is used for "
         "cross-validation and the final fit. The detecting data never touches training: the independent test run "
         f"({te['flows']:,} flows) for the one-time evaluation, three further 1 h runs (seeds 3001 to 3003) for "
         "robustness, and live streams (the test log replayed window by window and a new twin, seed 99) for real-time "
@@ -186,9 +187,10 @@ def methods(d, C, ctx):
 
     d.h2("Training and Evaluation Protocol")
     d.p(C("Following Arp et al. [@arp], we prevent leakage at every stage. (i) Hyperparameters are tuned on a "
-          "temporal hold-out: the first 75% of the training run fits and the last 25% validates (20 settings in "
-          "total). (ii) Five-fold cross-validation groups windows into 30-minute time blocks, so adjacent windows of "
-          "one campaign never sit on both sides of a split. (iii) The deployed model is chosen on cross-validation "
+          "temporal hold-out: the first three quarters of the training run fit and the rest validates, with the cut "
+          "moved past any campaign it would split (20 settings in total). (ii) Five-fold cross-validation groups "
+          "windows into 30-minute time blocks and assigns every window of a campaign to the block in which the "
+          "campaign starts, so no campaign sits on both sides of a split. (iii) The deployed model is chosen on cross-validation "
           "macro F1-score alone, with near-ties (below 0.002) broken by latency. (iv) Only then is each model tested "
           "once on the independent test run."))
     d.p("We report accuracy, precision, recall, F1-score, false positive rate (FPR) and ROC AUC for attack versus "
@@ -207,7 +209,9 @@ def methods(d, C, ctx):
         "twin keep blame accurate: when a frame's MAC does not match the registry, the device whose address is "
         "claimed is treated as a victim, and an unregistered host becomes its own tracked entity. Alerts for the "
         "same device and class within 30 s are grouped into one incident, labelled with its three most abnormal "
-        "features (z-scores against normal traffic, weighted by model importance) and a playbook action. Flows "
+        "features (z-scores against normal traffic, weighted by model importance; a feature that never varies in "
+        "normal traffic, such as the sender's registry status or TTL, gets a fixed high score when it deviates) and "
+        "a playbook action. Flows "
         "that the supervised model passes but the strict Isolation Forest flags become “unknown anomaly” "
         "alerts; with the optional twin rules (E3), a passed flow that breaks a rule becomes a “twin rule” alert "
         "first.")
@@ -223,7 +227,9 @@ def methods(d, C, ctx):
           "and labels every packet, that the cleaner removes capture artefacts but keeps extreme vital signs, that "
           "flows are oriented by the SYN, that no identifier is used as a feature, that rogue pump commands raise the "
           "pump-rate feature, that the twin rules and risk attribution behave as designed, that models train on any "
-          "subset of classes, that the benchmark loader matches the WUSTL-EHMS-2020 schema, and that the real-time "
+          "subset of classes, that saved models load on any platform, that cross-validation never splits a campaign, "
+          "that forged frames match benign sizes, that attacked pumps are restored, that explanations cite identity "
+          "evidence, that the benchmark loader matches the WUSTL-EHMS-2020 schema, and that the real-time "
           "detector runs end to end. One test confirms a key property: extracting features window by window, as the "
           "live detector does, gives exactly the same values for all 55 features as offline extraction, so the live "
           "model sees the inputs it was trained on.")

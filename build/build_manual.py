@@ -131,7 +131,8 @@ para("This manual explains how to set up the environment, generate the digital-t
      "three detection models, run every experiment in the report, run real-time detection and use the dashboard. "
      "Following it end to end reproduces all results, tables and figures in the final report.")
 table(["Item", "Details"], [
-    ["Software", "Python 3.10 or later (tested with Python 3.13 on Linux)"],
+    ["Software", "Python 3.13 (tested on Linux and Windows 11); requirements.txt pins the package versions used "
+                 "for the results"],
     ["Hardware", "4 CPU cores and 8 GB RAM recommended; about 1.5 GB free disk space"],
     ["Network access", "Only needed once, to install Python packages. The simulation never touches a real network."],
     ["Total run time", f"About {t('total_min', 45)} minutes for the full pipeline on a 4-core machine"],
@@ -246,9 +247,11 @@ table(["Option", "Meaning", "Default"], [
 doc.add_heading("4.2 Train, tune and evaluate the three models (E1)", level=2)
 code(["python -m medtwin.train --tune"])
 steps([
-    "Tunes each model on a temporal hold-out (first 75% of the training run fits, last 25% validates). "
+    "Tunes each model on a temporal hold-out (about the first 75% of the training run fits and the rest validates; "
+    "the cut never splits a campaign). "
     "Without `--tune`, the saved settings in `results/best_params.json` are reused.",
-    "Runs five-fold cross-validation with 30-minute time blocks as groups.",
+    "Runs five-fold cross-validation with 30-minute time blocks as groups (each campaign stays in the block where "
+    "it starts).",
     "Trains each model on the full training run and tests it once on the independent test run.",
     "Selects the deployed model on cross-validation macro F1-score (near-ties broken by latency) and saves it.",
     "Trains the Isolation Forest on normal training traffic only.",
@@ -368,7 +371,9 @@ para(f"The suite has {N_TESTS} tests and takes about {t('tests', '1.5 min')}. It
      "is used as a feature, that window-by-window extraction gives exactly the same 55 features as offline "
      "extraction, that a rogue pump command raises the pump-rate feature, that each twin rule fires only on its "
      "violation, that every model trains on a subset of classes, that the risk engine protects impersonated devices "
-     "and tracks rogue hosts, that the benchmark loader matches the WUSTL-EHMS-2020 schema and that the real-time "
+     "and tracks rogue hosts, that saved models load on any platform, that cross-validation never splits a campaign, "
+     "that forged frames match benign sizes, that attacked pumps are restored, that explanations cite identity "
+     "evidence, that the benchmark loader matches the WUSTL-EHMS-2020 schema and that the real-time "
      "detector runs end to end. Tests write only to temporary folders, so they never change the submitted results. "
      "The last test needs the trained models (step 2) and is skipped without them.")
 

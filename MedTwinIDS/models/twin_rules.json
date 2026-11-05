@@ -3,9 +3,9 @@
   "thresholds": {
     "SeqDup": 1.0,
     "SeqGap": 0.0,
-    "TwinResidualHR": 13.950613333333303,
-    "TwinResidualSpO2": 2.9801599999995387,
-    "PumpRateDelta": 0.0
+    "TwinResidualHR": 13.512166666667312,
+    "TwinResidualSpO2": 2.934083333333359,
+    "PumpRateDelta": 0.048249367909265393
   },
   "rules": {
     "R1": "unregistered sender",

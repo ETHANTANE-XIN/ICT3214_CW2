@@ -1,26 +1,37 @@
-============================= test session starts ==============================
-platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.7.0 -- /usr/bin/python
+============================= test session starts =============================
+platform win32 -- Python 3.13.1, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\User\AppData\Local\Temp\claude\af1f5fe4fb779199\02a6acdd-775f-42e6-9304-b62f4e8c86b8\scratchpad\env\Scripts\python.exe
 cachedir: .pytest_cache
-rootdir: /home/user/ICT3214_CW2/MedTwinIDS
-plugins: anyio-4.15.1
-collecting ... collected 17 items
+rootdir: C:\Users\User\Documents\GitHub\ICT3214_CW2\MedTwinIDS
+plugins: anyio-4.16.0
+collecting ... collected 28 items
 
-tests/test_medtwin.py::test_twin_is_deterministic PASSED                 [  5%]
-tests/test_medtwin.py::test_every_family_is_scheduled_and_labelled PASSED [ 11%]
-tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[3] PASSED [ 17%]
-tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[8] PASSED [ 23%]
-tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[20] PASSED [ 29%]
+tests/test_medtwin.py::test_twin_is_deterministic PASSED                 [  3%]
+tests/test_medtwin.py::test_every_family_is_scheduled_and_labelled PASSED [  7%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[3] PASSED [ 10%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[8] PASSED [ 14%]
+tests/test_medtwin.py::test_short_runs_keep_campaigns_inside_the_run[20] PASSED [ 17%]
+tests/test_medtwin.py::test_campaign_table_lists_every_source PASSED     [ 21%]
+tests/test_medtwin.py::test_forged_arp_frames_match_benign_sizes PASSED  [ 25%]
+tests/test_medtwin.py::test_tampered_pump_is_restored_and_medium_setpoints_stay_below_high PASSED [ 28%]
+tests/test_medtwin.py::test_takeover_victim_telemetry_is_labelled_spoofing PASSED [ 32%]
 tests/test_medtwin.py::test_cleaner_handles_capture_artefacts PASSED     [ 35%]
-tests/test_medtwin.py::test_scan_to_high_port_is_oriented_by_the_syn PASSED [ 41%]
-tests/test_medtwin.py::test_features_are_complete_and_identifier_free PASSED [ 47%]
-tests/test_medtwin.py::test_streaming_extraction_matches_batch PASSED    [ 52%]
-tests/test_medtwin.py::test_rogue_pump_command_raises_pump_rate_delta PASSED [ 58%]
-tests/test_medtwin.py::test_twin_rules_fire_on_violations_only PASSED    [ 64%]
-tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[Random Forest] PASSED [ 70%]
-tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[XGBoost] PASSED [ 76%]
-tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[MLP] PASSED [ 82%]
-tests/test_medtwin.py::test_risk_engine_protects_impersonated_devices_and_tracks_rogue_hosts PASSED [ 88%]
-tests/test_medtwin.py::test_benchmark_loader_matches_wustl_schema PASSED [ 94%]
+tests/test_medtwin.py::test_scan_to_high_port_is_oriented_by_the_syn PASSED [ 39%]
+tests/test_medtwin.py::test_features_are_complete_and_identifier_free PASSED [ 42%]
+tests/test_medtwin.py::test_streaming_extraction_matches_batch PASSED    [ 46%]
+tests/test_medtwin.py::test_vitals_delta_spans_a_window_without_telemetry PASSED [ 50%]
+tests/test_medtwin.py::test_rogue_pump_command_raises_pump_rate_delta PASSED [ 53%]
+tests/test_medtwin.py::test_twin_rules_fire_on_violations_only PASSED    [ 57%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[Random Forest] PASSED [ 60%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[XGBoost] PASSED [ 64%]
+tests/test_medtwin.py::test_models_train_on_a_subset_of_classes[MLP] PASSED [ 67%]
+tests/test_medtwin.py::test_xgboost_model_pickles_portably PASSED        [ 71%]
+tests/test_medtwin.py::test_cv_groups_never_split_a_campaign PASSED      [ 75%]
+tests/test_medtwin.py::test_tuning_cut_keeps_campaigns_whole PASSED      [ 78%]
+tests/test_medtwin.py::test_risk_engine_protects_impersonated_devices_and_tracks_rogue_hosts PASSED [ 82%]
+tests/test_medtwin.py::test_risk_engine_groups_alerts_into_incidents PASSED [ 85%]
+tests/test_medtwin.py::test_explainer_cites_identity_evidence PASSED     [ 89%]
+tests/test_medtwin.py::test_benchmark_loader_matches_wustl_schema PASSED [ 92%]
+tests/test_medtwin.py::test_live_summary_handles_no_campaigns_and_measures_delay PASSED [ 96%]
 tests/test_medtwin.py::test_realtime_detector_end_to_end PASSED          [100%]
 
-======================== 17 passed in 77.11s (0:01:17) =========================
+============================= 28 passed in 38.06s =============================

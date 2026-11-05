@@ -17,9 +17,11 @@ python -m medtwin.realtime --minutes 60 --speed 0 --seed 99 --start-hour 14 --qu
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import shutil
+import sys
 import time
 from datetime import datetime
 
@@ -36,13 +38,29 @@ from .rules import TwinRules
 from .twin import WardTwin
 
 COLOURS = {"Critical": "\033[91m", "High": "\033[93m", "Medium": "\033[96m", "Low": "\033[92m"}
+TIMELINE_COLS = ["t", "clock", "device_id", "risk"]
+CAMPAIGN_COLS = ["campaign", "attack", "intensity", "detected", "delay_s", "alerts", "class_correct"]
+_locked_warned: set[str] = set()
 
 
-def _atomic_write(path, text):
+def _atomic_write(path, text, attempts: int = 5) -> bool:
+    """Write via a temp file and os.replace so readers never see a half-written file; False if skipped."""
     tmp = str(path) + ".tmp"
-    with open(tmp, "w") as fh:
+    with open(tmp, "w", encoding="utf-8", newline="") as fh:
         fh.write(text)
-    os.replace(tmp, path)
+    for i in range(attempts):
+        try:
+            os.replace(tmp, path)
+            return True
+        except PermissionError:
+            # Windows refuses to replace a file another process (the dashboard) has open: retry briefly
+            time.sleep(0.02 * (i + 1))
+    with contextlib.suppress(OSError):
+        os.remove(tmp)
+    if str(path) not in _locked_warned:
+        _locked_warned.add(str(path))
+        print(f"warning: {path} is locked by another process, skipping this update (shown once)", file=sys.stderr)
+    return False
 
 
 def load_detector():
@@ -102,6 +120,9 @@ def run(args):
     engine = RiskEngine(registry, threshold=card.get("alert_threshold", 0.5), explainer=explainer)
     alerts_path = C.RUNTIME_DIR / "alerts.jsonl"
     alerts_path.write_text("")
+    # header only, so the dashboard does not show the previous run's curves until the first update
+    timeline_path = C.RUNTIME_DIR / "timeline.csv"
+    _atomic_write(timeline_path, pd.DataFrame(columns=TIMELINE_COLS).to_csv(index=False))
     timeline_rows, latencies, flows_total = [], [], 0
     vitals_latest: dict = {}
     carry = None
@@ -173,7 +194,7 @@ def run(args):
         )
         _atomic_write(C.RUNTIME_DIR / "state.json", json.dumps(state, default=str))
         if len(timeline_rows) > 0 and (int(t1 / W) % 6 == 0 or t1 >= duration):
-            pd.DataFrame(timeline_rows).to_csv(C.RUNTIME_DIR / "timeline.csv", index=False)
+            _atomic_write(timeline_path, pd.DataFrame(timeline_rows, columns=TIMELINE_COLS).to_csv(index=False))
 
         if not args.quiet:
             for a in new_alerts[:3]:
@@ -186,7 +207,8 @@ def run(args):
         if args.speed > 0:
             time.sleep(max(0.0, W / args.speed - (time.time() - loop_start)))
 
-    pd.DataFrame(timeline_rows).to_csv(C.RUNTIME_DIR / "timeline.csv", index=False)
+    # final copy is kept by --save-as, so wait longer for a reader to let go of the file
+    _atomic_write(timeline_path, pd.DataFrame(timeline_rows, columns=TIMELINE_COLS).to_csv(index=False), attempts=20)
     # only campaigns that started before the run ended can be detected (relevant with --stop-at)
     summary = summarise(engine, truth[truth["start"] < duration], latencies, flows_total, time.time() - t_wall0, W)
     (C.RUNTIME_DIR / "live_summary.json").write_text(json.dumps(summary, indent=2, default=str))
@@ -210,16 +232,18 @@ def summarise(engine, truth, latencies, flows_total, wall_s, W):
         rows.append(dict(campaign=c.campaign, attack=c.attack, intensity=c.intensity, detected=first is not None,
                          delay_s=round(first - c.start, 1) if first is not None else None,
                          alerts=len(hits), class_correct=round(len(correct) / len(hits), 3) if hits else None))
-    per = pd.DataFrame(rows)
+    # fixed columns: no campaign may have started yet (e.g. --stop-at 3), and the CSV still needs its header
+    per = pd.DataFrame(rows, columns=CAMPAIGN_COLS)
     per.to_csv(C.RUNTIME_DIR / "live_campaigns.csv", index=False)
     false_alerts = sum(1 for a in alerts if a["truth"] == C.NORMAL)
+    delays = per["delay_s"].dropna().astype(float)
     overall = dict(campaigns=len(per), detected=int(per["detected"].sum()) if len(per) else 0,
                    detection_rate=round(float(per["detected"].mean()), 3) if len(per) else None,
-                   mean_delay_s=round(float(per["delay_s"].dropna().mean()), 1) if per["delay_s"].notna().any() else None,
-                   median_delay_s=round(float(per["delay_s"].dropna().median()), 1) if per["delay_s"].notna().any() else None,
+                   mean_delay_s=round(float(delays.mean()), 1) if len(delays) else None,
+                   median_delay_s=round(float(delays.median()), 1) if len(delays) else None,
                    alerts=len(alerts), false_alerts=false_alerts, incidents=len(engine.incidents),
-                   flows=flows_total, avg_window_latency_ms=round(float(np.mean(latencies)), 1),
-                   p95_window_latency_ms=round(float(np.percentile(latencies, 95)), 1),
+                   flows=flows_total, avg_window_latency_ms=round(float(np.mean(latencies)), 1) if latencies else None,
+                   p95_window_latency_ms=round(float(np.percentile(latencies, 95)), 1) if latencies else None,
                    wall_seconds=round(wall_s, 1))
     return dict(overall=overall, per_campaign=rows)
 

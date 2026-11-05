@@ -100,7 +100,7 @@ d.table("Attack Families Injected by the Twin",
         ["Class", "Footprint", "Intensity knob"],
         [["DoS flood", "SYN or MQTT PUBLISH flood on gateway", "25 / 80 / 250 pkt/s"],
          ["Spoofing", "Client-ID takeover or IP/MAC clone with false vitals", "1x / 2x / 4x rate"],
-         ["Data alteration", "ARP poisoning, vitals modified in transit", "0.2 / 1 / 3 ARP/s"],
+         ["Data alteration", "ARP poisoning, vitals modified in transit", "0.2 / 1 / 3 poisoning rounds/s"],
          ["Unauth. access", "MQTT credential guessing, rogue pump command", "0.5 / 2 / 8 tries/s"],
          ["Reconnaissance", "Host and port scanning of the ward", "0.5 / 4 / 20 probes/s"],
          ["Exfiltration", "Bulk upload of records to an external host", "15 / 120 / 400 kB/s"]],
@@ -133,7 +133,8 @@ d.p(C("**Random Forest** [@breiman] averages many decorrelated trees and is a ro
       "class weights or oversampling. Models are built with scikit-learn [@pedregosa] and xgboost."))
 d.h2("Evaluation Protocol")
 d.p(C("Following Arp et al. [@arp], we avoid leakage. Hyperparameters are tuned on a temporal hold-out, five-fold "
-      "cross-validation uses 30-minute time blocks as groups, the model is selected on cross-validation alone, and "
+      "cross-validation uses 30-minute time blocks that keep each campaign whole as groups, the model is selected on "
+      "cross-validation alone, and "
       "results are reported once on the independent test run. Metrics are accuracy, precision, recall, F1-score, "
       "false positive rate, ROC AUC, macro F1-score across the seven classes, training time and per-flow latency. "
       "Planned experiments are: E1 model comparison, E2 feature-set ablation, E3 leave-one-attack-out zero-day "

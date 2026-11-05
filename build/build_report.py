@@ -1,5 +1,6 @@
 """Build the final report (IEEE template, .docx)."""
 import json
+import math
 import re
 
 import pandas as pd
@@ -53,7 +54,7 @@ ctx["clean"] = dict(missing=f"{tr['dropped_missing_essential']:,}", dups=f"{tr['
                     glitches=f"{tr['vital_glitches_nulled']:,}")
 
 # ------------------------------------------------------------------ zero-day summary
-zmean = zd.groupby("detector")[["recall", "fpr"]].mean()
+zmean = zd.groupby("detector")[["recall", "fpr", "fpr_outside_campaigns"]].mean()
 sup_mean = zmean.loc[["Random Forest", "XGBoost", "MLP"], "recall"]
 best_sup = sup_mean.idxmax()
 hyb = f"Hybrid ({best} + IF)"
@@ -97,7 +98,8 @@ ctx["text_e2"] = (
 iso_r = zd[zd["detector"] == "Isolation Forest"].set_index("held_out")["recall"]
 best_r = zd[zd["detector"] == best].set_index("held_out")["recall"]
 ctx["text_e3"] = (
-    f"{{FIG}} removes one attack family from training at a time. The supervised models largely fail on families "
+    f"{{FIG}} removes one attack family from training at a time; the supervised models use default "
+    "hyperparameters here, because the tuned ones were chosen with every family present. They largely fail on families "
     f"they have never seen: mean recall is {zmean.loc['Random Forest', 'recall']:.2f} for RF, "
     f"{zmean.loc['XGBoost', 'recall']:.2f} for XGBoost and {zmean.loc['MLP', 'recall']:.2f} for the MLP, because a "
     f"closed-world classifier assigns the unknown flows to the nearest class it knows, usually normal "
@@ -138,7 +140,10 @@ ctx["text_e3_rules"] = (
     f"examples and are the same whichever family is held out. On their own they catch {pct(rul['spoofing'], 0)} of "
     f"unseen spoofing and {pct(rul['data_alteration'], 0)} of unseen data alteration, exactly the integrity attacks "
     f"on which the Isolation Forest is weakest, at a false positive rate of "
-    f"{100 * zmean.loc['Twin rules', 'fpr']:.2f}%. Combined with {best} and the Isolation Forest, mean recall on "
+    f"{100 * zmean.loc['Twin rules', 'fpr']:.2f}%. Away from any attack the rate is "
+    f"{100 * zmean.loc['Twin rules', 'fpr_outside_campaigns']:.2f}%; most of the remaining false positives fall "
+    "inside attack windows on the honest bed partner of a spoofed or altered device, which R4 flags because it "
+    f"cannot tell which sensor is lying. Combined with {best} and the Isolation Forest, mean recall on "
     f"held-out families rises from {zmean.loc[hyb, 'recall']:.2f} to {zmean.loc[hyb_ir, 'recall']:.2f}, with every "
     f"family at {zd[zd['detector'] == hyb_ir]['recall'].min():.2f} or above, for a false positive rate of "
     f"{100 * zmean.loc[hyb_ir, 'fpr']:.2f}%. The threshold sets the trade-off: at the 99.99th percentile the rules' "
@@ -163,7 +168,7 @@ ctx["text_e4"] = (
     f"**Intensity.** {{FIG}} shows that recall is 1.00 for every high-intensity campaign in the test run. Low intensity is "
     f"hardest for data alteration ({best}: {iv('data_alteration', 'low')} at low versus "
     f"{iv('data_alteration', 'high')} at high intensity), where the in-transit offset is only 6 to 10 beats per "
-    f"minute and the ARP poisoning rate is one packet every five seconds. For RF, spoofing recall is "
+    f"minute and the ARP poisoning rate is one round (two forged replies) every five seconds. For RF, spoofing recall is "
     f"{iv('spoofing', 'low', itr)} (low) and {iv('spoofing', 'medium', itr)} (medium), against {iv('spoofing', 'low')} "
     f"and {iv('spoofing', 'medium')} for {best}. The random schedule placed no high-intensity spoofing or "
     "unauthorised-access campaign in the test run, so those cells are empty (Appendix C).")
@@ -187,7 +192,8 @@ ctx["text_xai"] = (
     f"exfiltration by {pc_top('exfiltration')}, unauthorised access by {pc_top('unauthorised_access')}, spoofing "
     f"by {pc_top('spoofing')}, and data alteration by {pc_top('data_alteration')}. {{FIGNEXT}} shows why the residual "
     "works: in a real clinical episode the monitor and the wearable move together, while an in-transit alteration "
-    "changes only the monitor. These explanations are what the dashboard shows an analyst with each incident.")
+    "changes only the monitor. The dashboard's Explainability page shows these attributions next to the "
+    "per-incident explanations.")
 
 lc = ctx["live_c"]
 # categorise live-run alerts on flows labelled normal
@@ -211,6 +217,18 @@ for a in alerts:
         fp["other"] += 1
 ctx["live_fp"] = fp
 print("live false-alert categories:", fp)
+# the real-time figure plots the four devices with the highest peak risk; say which peaks are only false alarms
+tl = pd.read_csv(RES / "e6_live_timeline.csv")
+top4 = list(tl.groupby("device_id")["risk"].max().sort_values(ascending=False).head(4).index)
+attacked = {a["device"] for a in alerts if a["truth"] != "normal"}
+false_only = [dv for dv in top4 if dv not in attacked]
+assert all(dv.startswith("PMP") for dv in false_only), "the figure note assumes false peaks come from pump commands"
+n_false = sum(1 for a in alerts if a["device"] in false_only)
+ctx["rt_fig_note"] = (f"{' and '.join(false_only)} peak{'s' if len(false_only) == 1 else ''} only on "
+                      + ("a false alarm from a routine nurse pump command." if n_false == 1
+                         else "false alarms from routine nurse pump commands.")
+                      if false_only else "Every plotted peak is a real attack.")
+were = lambda n: "was" if n == 1 else "were"
 ctx["text_e6"] = (
     f"We streamed the 3 h test log through the live detector window by window, and ran a new twin (seed 99, 60 min, "
     f"{live['campaigns']} campaigns) end to end. {{TABNEXT}} gives the results. In replay, {rep['detected']} of "
@@ -220,21 +238,23 @@ ctx["text_e6"] = (
     "fires once records start leaving for the external host. Processing a 5 s window takes "
     f"{live['avg_window_latency_ms']:.0f} ms on average (95th percentile {live['p95_window_latency_ms']:.0f} ms), "
     f"about {5000 / live['avg_window_latency_ms']:.0f} times faster than real time. Grouping turns "
-    f"{live['alerts']:,} alerts into {live['incidents']} incidents. {{FIGNEXT}} shows device risk: each attacked pump or "
-    "monitor and the rogue host jumps above 80 (Critical) as soon as its first alert fires and decays once its "
-    "traffic is clean, while the two peaks of PMP-01 are false alarms caused by a nurse pausing and later restarting "
-    "its infusion. Of the "
+    f"{live['alerts']:,} alerts into {live['incidents']} incidents. {{FIGNEXT}} plots the four devices with the "
+    f"highest peak risk ({', '.join(top4)}): an attacked device jumps above 80 (Critical) as soon as its first alert "
+    "fires and decays once its traffic is clean. " + ctx["rt_fig_note"] + " Of the "
     f"{live['false_alerts']} alerts on flows labelled normal, {ctx['live_fp']['iforest']} came from the Isolation "
-    f"Forest safety net, {ctx['live_fp']['partner']} were wearables whose paired monitor was being spoofed (the "
-    "residual is symmetric, so the right bed is flagged even though that flow carries no attack packets), "
-    f"{ctx['live_fp']['pump']} were nurse pump pauses or restarts and {ctx['live_fp']['artefact']} were wearable "
-    "motion artefacts (RQ5).")
+    f"Forest safety net, {ctx['live_fp']['partner']} {were(ctx['live_fp']['partner'])} wearables whose paired "
+    "monitor was being spoofed or altered (the residual is symmetric, so the right bed is flagged even though that "
+    f"flow carries no attack packets), {ctx['live_fp']['pump']} {were(ctx['live_fp']['pump'])} nurse pump commands, "
+    "including restores after an attack, and "
+    f"{ctx['live_fp']['artefact']} {were(ctx['live_fp']['artefact'])} "
+    + ("a wearable motion artefact" if ctx["live_fp"]["artefact"] == 1 else "wearable motion artefacts") + " (RQ5).")
 
 ctx["text_discussion"] = (
     f"**Implications.** First, the twin is useful twice: as a data source with exact labels and controllable "
     "attacks (RQ1), and as a source of features that make integrity attacks visible (RQ3). Second, binary accuracy "
-    "is a poor guide in this domain; every model exceeds 99.7% accuracy, yet one of them misses most impostor "
-    "flows, which only macro F1 and per-class analysis reveal. Third, model choice matters most for rare, subtle "
+    f"is a poor guide in this domain; every model exceeds {math.floor(comp['accuracy'].min() * 1000) / 10:.1f}% "
+    f"accuracy, yet RF misses {pct(diag['rf_impostor_as_normal'], 0)} of impostor flows, which only macro F1 and "
+    "per-class analysis reveal. Third, model choice matters most for rare, subtle "
     "attacks: boosting and the neural network capture weak, combined evidence that bagging dilutes. Fourth, a "
     "supervised IDS alone is closed-world [@sommer]; pairing it with an unsupervised model raises recall on unseen "
     "attacks but needs alert grouping and context to keep false positives manageable. Fifth, the twin is useful a "
@@ -245,8 +265,9 @@ ctx["text_discussion"] = (
 ctx["text_limits"] = (
     "**Limitations.** The data is simulated: real devices, protocols and attackers are more varied, and our "
     "benign confounders cover only some sources of noise, so absolute scores are optimistic. Flow-level labels "
-    "can disagree with bed-level reality, as the paired-sensor alerts show. Nurse pump pauses still trigger "
-    "unauthorised-access alerts because the pump-side flow does not reveal who sent the command. The twin rules "
+    "can disagree with bed-level reality, as the paired-sensor alerts show. Nurse pump commands, including restores "
+    "after an attack, still trigger unauthorised-access alerts because the pump-side flow does not reveal who sent "
+    "the command. The twin rules "
     "encode invariants of our simulated ward; real devices can break them for benign reasons, so their thresholds "
     "would need calibrating on each ward's own traffic. Some test cells (high-intensity spoofing) are empty, and we "
     "could not yet run the WUSTL-EHMS-2020 benchmark in our environment; the script is provided.")
@@ -272,6 +293,7 @@ _ex = ctx["extra"].pivot(index="seed", columns="model", values="macro_f1")
 assert (_ex.idxmax(axis=1) == best).all(), "abstract says the selected model is best on every extra ward"
 assert ctx["boot"].loc["Random Forest", "diff_vs_best_low"] > 0, "conclusion says the lead over RF is significant"
 assert ctx["boot"].loc["MLP", "diff_vs_best_low"] < 0 < ctx["boot"].loc["MLP", "diff_vs_best_high"], "tie with MLP"
+assert xg["cv_macro_f1_sd"] < comp.loc["MLP", "cv_macro_f1_sd"], "conclusion says it is more stable than the MLP"
 
 # ------------------------------------------------------------------ build
 d = IEEEDoc(str(TEMPLATE), footer_text=FOOTER)

@@ -1,13 +1,13 @@
 campaign,attack,intensity,start,end,duration,source_ip,source_kind,variant,target
-0,dos_flood,low,331.82,426.89,95.1,10.10.1.17,patient_monitor,syn,10.10.0.10
+0,dos_flood,low,331.82,426.89,95.1,10.10.1.17;10.10.1.13,patient_monitor;patient_monitor,syn,10.10.0.10
 1,exfiltration,medium,529.01,730.41,201.4,10.10.0.10,gateway,,203.0.113.77
 2,unauthorised_access,high,790.82,950.78,160.0,10.10.9.66,rogue,,PMP-03
 3,exfiltration,high,1056.69,1271.6,214.9,10.10.0.10,gateway,,203.0.113.77
 4,data_alteration,low,1377.48,1475.95,98.5,10.10.9.66,rogue,,"WRB-06,WRB-02"
-5,reconnaissance,high,1643.23,1820.75,177.5,10.10.3.11,wearable,,10.10.0.10
+5,reconnaissance,high,1643.23,1820.75,177.5,10.10.3.11,wearable,,10.10.0.0/16
 6,data_alteration,low,1995.65,2095.42,99.8,10.10.0.51,workstation,,"WRB-07,MON-06"
 7,unauthorised_access,high,2318.74,2382.04,63.3,10.10.0.52,workstation,,PMP-05
 8,spoofing,medium,2504.8,2696.39,191.6,10.10.9.66,rogue,clone,MON-01
 9,spoofing,high,2799.18,3013.59,214.4,10.10.9.66,rogue,clone,WRB-02
-10,reconnaissance,medium,3045.71,3280.52,234.8,10.10.9.66,rogue,,10.10.0.10
-11,dos_flood,low,3456.09,3583.42,127.3,10.10.3.17,wearable,publish,10.10.0.10
+10,reconnaissance,medium,3045.71,3280.52,234.8,10.10.9.66,rogue,,10.10.0.0/16
+11,dos_flood,low,3456.09,3583.42,127.3,10.10.3.17;10.10.1.17,wearable;patient_monitor,publish,10.10.0.10

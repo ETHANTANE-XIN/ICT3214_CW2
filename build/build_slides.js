@@ -194,7 +194,7 @@ async function icon(Comp, color = "FFFFFF", size = 256) {
   const arows = [
     ["DoS flood", "SYN or MQTT PUBLISH flood on the gateway", "25 / 80 / 250 pkt/s"],
     ["Spoofing", "Client-ID takeover or IP/MAC clone with false vitals", "1x / 2x / 4x rate"],
-    ["Data alteration", "ARP poisoning; vitals changed in transit", "0.2 / 1 / 3 ARP/s"],
+    ["Data alteration", "ARP poisoning; vitals changed in transit", "0.2 / 1 / 3 rounds/s"],
     ["Unauthorised access", "Credential guessing, then rogue pump command", "0.5 / 2 / 8 tries/s"],
     ["Reconnaissance", "Host and port scanning of the ward", "0.5 / 4 / 20 probes/s"],
     ["Exfiltration", "EHR records staged, then uploaded externally", "15 / 120 / 400 kB/s"],
@@ -283,7 +283,7 @@ async function icon(Comp, color = "FFFFFF", size = 256) {
   // 10 ----------------------------------------------------------------- E1
   pres.addSection({ title: "Results" });
   s = add("Results");
-  T(s, `${best} is the most accurate and stable, and fast`);
+  T(s, INS.e1_title);
   const order = ["Random Forest", "XGBoost", "MLP"];
   const head = ["Model", "Accuracy", "Binary F1", "Macro F1", "95% interval", "CV macro F1", "Extra wards", "Latency (ms)"].map((t) => ({ text: t, options: { bold: true, color: HEX.white, fill: { color: HEX.navy } } }));
   const mrows = order.map((m) => [m, fmt(M[m].accuracy, 4), fmt(M[m].f1, 4), fmt(M[m].macro_f1),
@@ -448,7 +448,8 @@ async function icon(Comp, color = "FFFFFF", size = 256) {
   if (applyTheme) await applyTheme(out, THEME);
   else console.log("PPTX_SKILL not set: colour theme left at the Office defaults");
   // own metadata and British English proofing (shared with the Word builders)
-  require("child_process").execFileSync("python3", [path.join(__dirname, "finalise.py"), out, "--title",
+  const python = process.env.PYTHON || (process.platform === "win32" ? "python" : "python3");
+  require("child_process").execFileSync(python, [path.join(__dirname, "finalise.py"), out, "--title",
     "MedTwin-IDS: AI-Driven Intrusion Detection and Device Risk Scoring for a Medical IoT Digital Twin",
     "--subject", pres.subject], { stdio: "inherit" });
   console.log("saved", out);

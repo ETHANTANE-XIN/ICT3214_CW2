@@ -21,10 +21,10 @@ with per-device risk scores, grouped incidents and a Streamlit dashboard.
 
 | Question | Result |
 |---|---|
-| Best model | XGBoost, chosen by time-blocked cross-validation: macro F1 0.986, binary F1 0.9974, 0.83 ms per flow |
-| Do twin features help? | Macro F1 0.876 without them, 0.986 with them; spoofing recall 38% to 97% |
-| Unseen attack families | Mean recall 0.24 (XGBoost), 0.77 with an Isolation Forest, 0.96 with the twin rules added |
-| Real time | 30 of 30 test campaigns detected, median time-to-detect 3.5 s |
+| Best model | XGBoost, chosen by time-blocked cross-validation: macro F1 0.981, binary F1 0.9966, 2.28 ms per flow |
+| Do twin features help? | Macro F1 0.835 without them, 0.981 with them; spoofing recall 28% to 97% |
+| Unseen attack families | Mean recall 0.33 (XGBoost), 0.73 with an Isolation Forest, 0.97 with the twin rules added |
+| Real time | 30 of 30 test campaigns detected, median time-to-detect 3.7 s |
 
 ## Quick start
 
@@ -32,7 +32,7 @@ with per-device risk scores, grouped incidents and a Streamlit dashboard.
 cd MedTwinIDS
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m pytest -v                                    # 17 automated tests
+python -m pytest -v                                    # 28 automated tests
 streamlit run dashboard/app.py                         # dashboard on the included results
 ```
 
@@ -51,7 +51,13 @@ python package.py                                      # deliverables/ICT3214_CW
 ```
 
 The `.doc` copies are converted from the `.docx` files with LibreOffice
-(`soffice --headless --convert-to "doc:MS Word 97" <file>.docx`).
+(`soffice --headless --convert-to "doc:MS Word 97" <file>.docx`) or by saving them as Word 97-2003 documents in Word.
+
+The dashboard and terminal screenshots in `MedTwinIDS/results/figures/` are captured with Playwright
+(`npx playwright install chromium` once, after `npm install`): run `streamlit run dashboard/app.py`, then
+`node screenshots.js ../MedTwinIDS/results/figures` and `node screenshots_sections.js ../MedTwinIDS/results/figures`;
+`python terminal_shots.py` renders the console logs in `build/terminal/`. Set `PPTX_SKILL` to a folder providing
+`scripts/apply_theme.js` to give the slides their colour theme.
 
 ## Safety
 
