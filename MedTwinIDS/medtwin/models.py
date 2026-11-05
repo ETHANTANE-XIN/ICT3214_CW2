@@ -16,7 +16,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
-from xgboost import XGBClassifier
+from xgboost import Booster, XGBClassifier
 
 from . import config as C
 
@@ -26,6 +26,32 @@ CLASS_INDEX = {c: i for i, c in enumerate(C.CLASSES)}
 
 def signed_log(x):
     return np.sign(x) * np.log1p(np.abs(x))
+
+
+class PortableXGBClassifier(XGBClassifier):
+    """XGBClassifier that pickles its booster in XGBoost's portable UBJSON model format.
+
+    The default pickle holds the booster's memory snapshot, whose random-number-generator state is
+    written in a platform-specific text format, so a model saved on Linux will not load on Windows
+    (and vice versa). The model format keeps everything prediction needs and is the same everywhere.
+    """
+
+    def __getstate__(self):
+        state = dict(super().__getstate__())  # copy: the default state is the live __dict__
+        if isinstance(state.get("_Booster"), Booster):
+            state["_Booster"] = bytes(state["_Booster"].save_raw("ubj"))
+        return state
+
+    def __setstate__(self, state):
+        if isinstance(state.get("_Booster"), (bytes, bytearray)):
+            state["_Booster"] = Booster({"n_jobs": state.get("n_jobs")}, model_file=bytearray(state["_Booster"]))
+        super().__setstate__(state)
+
+    def __copy__(self):
+        # get_params() copies the estimator: keep that a cheap shallow copy, not a booster round trip
+        cp = self.__class__.__new__(self.__class__)
+        cp.__dict__.update(self.__dict__)
+        return cp
 
 
 def make_model(name: str, seed: int = 42, n_jobs: int = -1, fast: bool = False, **params):
@@ -39,7 +65,7 @@ def make_model(name: str, seed: int = 42, n_jobs: int = -1, fast: bool = False, 
                  colsample_bytree=0.8, min_child_weight=1, tree_method="hist", n_jobs=n_jobs,
                  random_state=seed, eval_metric="mlogloss")
         p.update(params)
-        return XGBClassifier(**p)
+        return PortableXGBClassifier(**p)
     if name == "MLP":
         p = dict(hidden_layer_sizes=(128, 64, 32), activation="relu", solver="adam", alpha=1e-4,
                  batch_size=256, learning_rate_init=1e-3, max_iter=60 if fast else 200, early_stopping=True,

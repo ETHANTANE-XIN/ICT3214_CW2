@@ -1,9 +1,11 @@
 """Experiments E1b-E5 plus explainability and runtime assets.
 
-E1b Robustness: bootstrap confidence intervals on the test run and three extra unseen ward runs.
+E1b Robustness: cluster-bootstrap confidence intervals on the test run (whole campaigns and 5-minute
+    blocks of normal traffic are resampled) and three extra unseen ward runs.
 E2  Feature-set ablation: network only / biometric only / network+biometric / full twin.
-E3  Zero-day generalisation: leave one attack family out of training, then test on it; includes the
-    label-free twin consistency rules (medtwin.rules) as a designed remedy for unseen attacks.
+E3  Zero-day generalisation: leave one attack family out of training (default hyperparameters), then
+    test on it; includes the label-free twin consistency rules (medtwin.rules) as a designed remedy
+    for unseen attacks.
 E4  Attack intensity: detection recall for low / medium / high intensity campaigns.
 E5  Window size: accuracy versus time-to-detect for 2 s, 5 s and 10 s windows.
 Diag Spoofing diagnostic: impostor versus victim flows for each model.
@@ -47,23 +49,36 @@ def runtime_assets(train: pd.DataFrame):
 
 
 # --------------------------------------------------------------------------
-def e1_robustness(test: pd.DataFrame, n_boot: int = 1000):
-    """Bootstrap 95% intervals on the test run, and the saved models on three extra unseen ward runs."""
-    from sklearn.metrics import f1_score
-    from .simulate import run_simulation
+def cluster_bootstrap_weights(flows: pd.DataFrame, n_boot: int, seed: int = 0, block_s: float = 300.0):
+    """Cluster bootstrap for flows that are not independent draws. Attack flows are resampled as whole
+    campaigns within their attack family and normal flows as whole 5-minute blocks; each replicate is
+    returned as per-flow weights (how many times the flow's cluster was drawn)."""
+    att = (flows["attack"] != C.NORMAL).to_numpy()
+    cluster = np.where(att, flows["attack"].astype(str) + "/" + flows["campaign"].astype(str),
+                       C.NORMAL + "/" + (flows["t_start"] // block_s).astype(int).astype(str))
+    codes, names = pd.factorize(cluster)
+    stratum = np.array([n.split("/")[0] for n in names])
+    strata = [np.flatnonzero(stratum == s) for s in np.unique(stratum)]
+    rng = np.random.default_rng(seed)
+    for _ in range(n_boot):
+        counts = np.zeros(len(names))
+        for ids in strata:
+            counts += np.bincount(rng.choice(ids, len(ids)), minlength=len(names))
+        yield counts[codes]
 
-    pr = pd.read_csv(C.RESULTS_DIR / "test_predictions.csv")
+
+def bootstrap_intervals(pr: pd.DataFrame, best: str, n_boot: int = 1000) -> pd.DataFrame:
+    """95% cluster-bootstrap intervals of macro F1 per model and of the paired difference to the selected one."""
+    from sklearn.metrics import f1_score
+
     y = pr["attack"].map({c: i for i, c in enumerate(C.CLASSES)}).to_numpy()
     preds = {m: pr[f"pred_{m}"].map({c: i for i, c in enumerate(C.CLASSES)}).to_numpy() for m in MODEL_NAMES}
-    rng = np.random.default_rng(0)
     boot = {m: [] for m in MODEL_NAMES}
-    for _ in range(n_boot):
-        idx = rng.integers(0, len(y), len(y))
+    for w in cluster_bootstrap_weights(pr, n_boot):
         for m in MODEL_NAMES:
-            boot[m].append(f1_score(y[idx], preds[m][idx], average="macro", labels=range(len(C.CLASSES)),
+            boot[m].append(f1_score(y, preds[m], sample_weight=w, average="macro", labels=range(len(C.CLASSES)),
                                     zero_division=0))
     boot = {m: np.array(v) for m, v in boot.items()}
-    best = best_model_name()
     rows = []
     for m in MODEL_NAMES:
         lo, hi = np.percentile(boot[m], [2.5, 97.5])
@@ -72,8 +87,20 @@ def e1_robustness(test: pd.DataFrame, n_boot: int = 1000):
             dlo, dhi = np.percentile(boot[best] - boot[m], [2.5, 97.5])
             row.update(diff_vs_best_low=dlo, diff_vs_best_high=dhi)
         rows.append(row)
-    pd.DataFrame(rows).to_csv(C.RESULTS_DIR / "e1_bootstrap.csv", index=False)
-    print(pd.DataFrame(rows).round(4).to_string(index=False))
+    return pd.DataFrame(rows)
+
+
+def e1_robustness(test: pd.DataFrame, n_boot: int = 1000):
+    """Bootstrap 95% intervals on the test run, and the saved models on three extra unseen ward runs."""
+    from .simulate import run_simulation
+
+    pr = pd.read_csv(C.RESULTS_DIR / "test_predictions.csv", low_memory=False)
+    for col in ("campaign", "t_start"):  # cluster keys (same row order as the test flows)
+        if col not in pr:
+            pr[col] = test[col].to_numpy()
+    bt = bootstrap_intervals(pr, best_model_name(), n_boot)
+    bt.to_csv(C.RESULTS_DIR / "e1_bootstrap.csv", index=False)
+    print(bt.round(4).to_string(index=False))
 
     reg = pd.read_csv(C.DATA_DIR / "devices.csv")
     models = {m: joblib.load(C.MODEL_DIR / f"{m.lower().replace(' ', '_')}.joblib") for m in MODEL_NAMES}
@@ -111,7 +138,16 @@ def e2_ablation(train, test, params):
     return df
 
 
-def e3_zero_day(train, test, params, iso_thr):
+def outside_campaigns(flows: pd.DataFrame, campaigns: pd.DataFrame, W: float = C.WINDOW_SECONDS,
+                      margin: float = 5.0) -> np.ndarray:
+    """True for flows whose window does not overlap any campaign's [start - margin, end + margin]."""
+    t0 = flows["t_start"].to_numpy(dtype=float)[:, None]
+    lo = campaigns["start"].to_numpy(dtype=float)[None, :] - margin
+    hi = campaigns["end"].to_numpy(dtype=float)[None, :] + margin
+    return ~((t0 <= hi) & (t0 + W > lo)).any(axis=1)
+
+
+def e3_zero_day(train, test, iso_thr):
     iso = joblib.load(C.MODEL_DIR / "isolation_forest.joblib")
     Xte_all, yte_all = xy(test)
     iso_scores = iso.score_samples(Xte_all)
@@ -121,6 +157,14 @@ def e3_zero_day(train, test, params, iso_thr):
     rule_flag = TwinRules.load(C.MODEL_DIR / "twin_rules.json").flag(test)
     best = best_model_name()
     normal_mask = yte_all == 0
+    # normal flows away from any attack: R3/R4 rightly flag honest bed-partner and victim flows during
+    # an attack, which counts against the plain false positive rate
+    quiet = normal_mask & outside_campaigns(test, pd.read_csv(C.DATA_DIR / "test_campaigns.csv"))
+
+    def rates(flag, held):
+        return dict(recall=float(flag[held].mean()), fpr=float(flag[normal_mask].mean()),
+                    fpr_outside_campaigns=float(flag[quiet].mean()))
+
     rows = []
     for k, attack in enumerate(C.ATTACKS, start=1):
         tr = train[train["attack"] != attack]
@@ -128,38 +172,42 @@ def e3_zero_day(train, test, params, iso_thr):
         held = yte_all == k
         sup_flags = {}
         for name in MODEL_NAMES:
-            m = fit_model(name, make_model(name, **params.get(name, {})), Xtr, ytr)
+            # make_model defaults: best_params.json was tuned on a hold-out that contains the held-out family
+            m = fit_model(name, make_model(name), Xtr, ytr)
             pred = full_proba(m, Xte_all).argmax(1)
             flag = pred != 0
             sup_flags[name] = flag
-            rows.append(dict(held_out=attack, detector=name, recall=float(flag[held].mean()),
-                             fpr=float(flag[normal_mask].mean())))
+            rows.append(dict(held_out=attack, detector=name, **rates(flag, held)))
             print(f"  E3 held-out {attack:20s} {name:13s} recall {flag[held].mean():.3f}")
-        rows.append(dict(held_out=attack, detector="Isolation Forest", recall=float(iso_flag[held].mean()),
-                         fpr=float(iso_flag[normal_mask].mean())))
-        rows.append(dict(held_out=attack, detector="Twin rules", recall=float(rule_flag[held].mean()),
-                         fpr=float(rule_flag[normal_mask].mean())))
+        rows.append(dict(held_out=attack, detector="Isolation Forest", **rates(iso_flag, held)))
+        rows.append(dict(held_out=attack, detector="Twin rules", **rates(rule_flag, held)))
         for name in MODEL_NAMES:
-            hyb = sup_flags[name] | iso_flag
-            rows.append(dict(held_out=attack, detector=f"Hybrid ({name} + IF)", recall=float(hyb[held].mean()),
-                             fpr=float(hyb[normal_mask].mean())))
+            rows.append(dict(held_out=attack, detector=f"Hybrid ({name} + IF)",
+                             **rates(sup_flags[name] | iso_flag, held)))
         for label, flag in ((f"Hybrid ({best} + twin rules)", sup_flags[best] | rule_flag),
                             (f"Hybrid ({best} + IF + twin rules)", sup_flags[best] | iso_flag | rule_flag)):
-            rows.append(dict(held_out=attack, detector=label, recall=float(flag[held].mean()),
-                             fpr=float(flag[normal_mask].mean())))
+            rows.append(dict(held_out=attack, detector=label, **rates(flag, held)))
     df = pd.DataFrame(rows)
     df.to_csv(C.RESULTS_DIR / "e3_zero_day.csv", index=False)
-    # sensitivity of the rules to their threshold quantile (reported, not used to choose the default)
+    rules_sensitivity(train, test, quiet)
+    return df
+
+
+def rules_sensitivity(train, test, quiet):
+    """Sensitivity of the rules to their threshold quantile (reported, not used to choose the default)."""
     from . import rules as R
+    attack = test["attack"].to_numpy()
     sens = []
     for q in (0.999, 0.9995, 0.9999):
         default, R.QUANTILE = R.QUANTILE, q
         flag = TwinRules().fit(train).flag(test)
         R.QUANTILE = default
-        row = {a: float(flag[(yte_all == k)].mean()) for k, a in enumerate(C.ATTACKS, start=1)}
-        sens.append(dict(quantile=q, fpr=float(flag[normal_mask].mean()), **row))
-    pd.DataFrame(sens).to_csv(C.RESULTS_DIR / "e3_rules_sensitivity.csv", index=False)
-    return df
+        row = {a: float(flag[attack == a].mean()) for a in C.ATTACKS}
+        sens.append(dict(quantile=q, fpr=float(flag[attack == C.NORMAL].mean()),
+                         fpr_outside_campaigns=float(flag[quiet].mean()), **row))
+    sens = pd.DataFrame(sens)
+    sens.to_csv(C.RESULTS_DIR / "e3_rules_sensitivity.csv", index=False)
+    return sens
 
 
 def e4_intensity():
@@ -287,7 +335,7 @@ def main():
     if "e2" in todo:
         e2_ablation(train, test, params)
     if "e3" in todo:
-        e3_zero_day(train, test, params, thr)
+        e3_zero_day(train, test, thr)
     if "e5" in todo:
         e5_window(params, best)
 

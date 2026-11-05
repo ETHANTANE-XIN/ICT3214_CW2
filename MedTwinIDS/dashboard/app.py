@@ -50,9 +50,10 @@ def read_state():
     if not p.exists():
         return None
     try:
-        return json.loads(p.read_text())
-    except json.JSONDecodeError:
-        return None
+        st.session_state["last_state"] = json.loads(p.read_text())
+    except (json.JSONDecodeError, OSError):
+        pass  # the detector is replacing the file (locked or partial on Windows): keep the last good state
+    return st.session_state.get("last_state")
 
 
 def tile(dev):
@@ -117,8 +118,11 @@ def live_page():
         with right:
             st.subheader("Risk timeline")
             tl = C.RUNTIME_DIR / "timeline.csv"
-            if tl.exists():
-                t = pd.read_csv(tl)
+            try:
+                t = pd.read_csv(tl) if tl.exists() else None
+            except (pd.errors.EmptyDataError, pd.errors.ParserError, OSError):
+                t = None  # being rewritten by the detector: skip the panel for this refresh
+            if t is not None and len(t):
                 top = t.groupby("device_id")["risk"].max().sort_values(ascending=False).head(6).index
                 fig = px.line(t[t["device_id"].isin(top)], x="clock", y="risk", color="device_id", height=320)
                 fig.add_hrect(y0=80, y1=100, fillcolor="#c62828", opacity=0.08, line_width=0)

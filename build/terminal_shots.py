@@ -61,8 +61,7 @@ def build():
     }
     for name, (cmd, lines, width) in shots.items():
         (TERM / f"{name}.html").write_text(page(cmd, to_html("\n".join(lines)), width))
-    subprocess.run(["node", str(HERE / "terminal_shots.js"), str(TERM), str(FIG), *shots], check=True,
-                   env={"NODE_PATH": "/opt/node22/lib/node_modules", "PATH": "/usr/bin:/bin:/opt/node22/bin"})
+    subprocess.run(["node", str(HERE / "terminal_shots.js"), str(TERM), str(FIG), *shots], check=True)
 
 
 if __name__ == "__main__":

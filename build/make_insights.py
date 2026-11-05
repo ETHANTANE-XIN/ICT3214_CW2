@@ -31,17 +31,24 @@ live_rules = json.loads((RES / "e6_live_rules_live_summary.json").read_text())["
 pytest_txt = (RES.parents[1] / "build" / "terminal" / "pytest.txt").read_text()
 n_tests = int(re.search(r"(\d+) passed", pytest_txt).group(1))
 
+n3 = lambda v: f"{0.0 if round(v, 3) == 0 else v:.3f}"  # no "-0.000"
+most_stable = xg["cv_macro_f1_sd"] <= min(rf["cv_macro_f1_sd"], ml["cv_macro_f1_sd"])
+fastest = xg["train_s"] <= min(rf["train_s"], ml["train_s"])
 ins = {
-    "e1": (f"All three exceed 99.7% accuracy, so accuracy hides the difference; macro F1 does not. {best} was chosen "
-           f"on cross-validation (the highest and most stable). On the test run it ties with the MLP (paired "
+    "e1_title": f"{best} is the most accurate" + (", most stable" if most_stable else "") + " and fast",
+    "e1": (f"All three exceed {int(comp['accuracy'].min() * 1000) / 10:.1f}% accuracy, so accuracy hides the "
+           f"difference; macro F1 does not. {best} was chosen on cross-validation (the highest"
+           + (" and most stable" if most_stable else "") + "). On the test run it ties with the MLP (paired "
            f"bootstrap) and beats Random Forest; on three extra unseen wards it is best {wins} times out of 3."),
-    "e1_notes": (f"Selection used cross-validation only. The 95% bootstrap interval of the macro-F1 difference is "
-                 f"{boot.loc['Random Forest', 'diff_vs_best_low']:.3f} to {boot.loc['Random Forest', 'diff_vs_best_high']:.3f} "
-                 f"against Random Forest (a real lead) and {boot.loc['MLP', 'diff_vs_best_low']:.3f} to "
-                 f"{boot.loc['MLP', 'diff_vs_best_high']:.3f} against the MLP (a tie). On the extra wards the MLP fell to "
-                 f"{ex_runs['MLP'].min():.3f} once, missing a low-intensity clone spoof. {best} also trains fastest "
-                 f"({xg['train_s']:.0f} s) and needs {xg['latency_ms']:.2f} ms per flow; Random Forest is "
-                 f"{rf['latency_ms'] / xg['latency_ms']:.0f}x slower per flow and much weaker on integrity attacks."),
+    "e1_notes": (f"Selection used cross-validation only. The 95% cluster-bootstrap interval of the macro-F1 difference "
+                 f"is {n3(boot.loc['Random Forest', 'diff_vs_best_low'])} to "
+                 f"{n3(boot.loc['Random Forest', 'diff_vs_best_high'])} against Random Forest (a real lead) and "
+                 f"{n3(boot.loc['MLP', 'diff_vs_best_low'])} to {n3(boot.loc['MLP', 'diff_vs_best_high'])} against the "
+                 f"MLP (a tie). On the extra wards {best} averages {ex_runs[best].mean():.3f}, the MLP "
+                 f"{ex_runs['MLP'].mean():.3f} and Random Forest {ex_runs['Random Forest'].mean():.3f}. {best} "
+                 + (f"also trains fastest ({xg['train_s']:.0f} s)" if fastest else f"trains in {xg['train_s']:.0f} s")
+                 + f" and needs {xg['latency_ms']:.2f} ms per flow; Random Forest is "
+                 f"{rf['latency_ms'] / xg['latency_ms']:.0f}x slower per flow and weaker on spoofing."),
     "confusion": (f"Random Forest calls {diag['rf_impostor_as_normal']:.0%} of impostor spoofing flows normal; "
                   f"XGBoost and the MLP catch {diag['xgb_impostor']:.0%} and {diag['mlp_impostor']:.0%}. The evidence is a "
                   "few weak twin signals that bagging outvotes and boosting focuses on."),
@@ -98,7 +105,7 @@ ins = {
     "limitations": [
         "Simulated data: real devices and attackers vary more, so absolute scores are optimistic",
         "Twin rules catch unseen integrity attacks but add false alerts",
-        "Nurse pump pauses can look like rogue commands",
+        "Nurse pump commands, including restores after an attack, can look like rogue commands",
         "Flow labels can disagree with bed-level reality",
         "WUSTL-EHMS-2020 benchmark script ready but not yet run",
     ],

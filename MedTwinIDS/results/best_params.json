@@ -1,11 +1,11 @@
 {
   "Random Forest": {
     "n_estimators": 400,
-    "max_depth": null,
+    "max_depth": 24,
     "min_samples_leaf": 1
   },
   "XGBoost": {
-    "max_depth": 6,
+    "max_depth": 10,
     "learning_rate": 0.05,
     "n_estimators": 500
   },
@@ -15,6 +15,6 @@
       128,
       64
     ],
-    "alpha": 0.0001
+    "alpha": 0.001
   }
 }

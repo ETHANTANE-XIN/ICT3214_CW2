@@ -2,9 +2,11 @@
 
 Protocol (leakage-aware, following Arp et al. 2022):
   1. Hyperparameters are tuned on a *temporal* hold-out: the first 75 % of the
-     training run fits the model, the last 25 % validates it.
+     training run fits the model, the last 25 % validates it (the cut is moved
+     past any attack campaign it would split).
   2. Five-fold StratifiedGroupKFold cross-validation on the training run, with
-     30-minute time blocks as groups, estimates stability.
+     30-minute time blocks as groups (each campaign kept whole in the block in
+     which it starts), estimates stability.
   3. The deployed model is chosen on cross-validation macro-F1 (ties broken by
      latency) and only then evaluated once on the independent test run, which
      was simulated with a different seed, different patients and a different
@@ -43,6 +45,26 @@ def load_flows(name: str) -> pd.DataFrame:
 
 def time_blocks(df: pd.DataFrame, minutes: float = 30.0) -> np.ndarray:
     return (df["t_start"] // (minutes * 60)).astype(int).to_numpy()
+
+
+def campaign_blocks(df: pd.DataFrame, minutes: float = 30.0) -> np.ndarray:
+    """Time blocks in which every flow of an attack campaign takes the block of the campaign's first flow,
+    so a campaign that crosses a block boundary is never split across cross-validation folds."""
+    blocks = pd.Series(time_blocks(df, minutes), index=df.index)
+    att = df["campaign"] >= 0
+    first = df.loc[att].groupby("campaign")["t_start"].transform("min")
+    blocks[att] = (first // (minutes * 60)).astype(int)
+    return blocks.to_numpy()
+
+
+def campaign_safe_cut(df: pd.DataFrame, cut: float) -> float:
+    """Move a temporal cut (fit side: t_start < cut) past the last flow of any campaign it would split."""
+    spans = df[df["campaign"] >= 0].groupby("campaign")["t_start"].agg(["min", "max"])
+    while True:
+        split = spans[(spans["min"] < cut) & (spans["max"] >= cut)]
+        if split.empty:
+            return cut
+        cut = float(np.nextafter(split["max"].max(), np.inf))  # overlapping campaigns: repeat until clear
 
 
 # --------------------------------------------------------------------------
@@ -90,8 +112,11 @@ def metrics_from_proba(y: np.ndarray, proba: np.ndarray) -> dict:
 # Tuning and cross-validation
 # --------------------------------------------------------------------------
 def tune(train: pd.DataFrame, names=MODEL_NAMES) -> dict:
-    cut = train["t_start"].quantile(0.75)
+    q75 = float(train["t_start"].quantile(0.75))
+    cut = campaign_safe_cut(train, q75)  # a campaign stays whole on the fit side
     fit_df, val_df = train[train["t_start"] < cut], train[train["t_start"] >= cut]
+    print(f"  tune cut {cut:.1f} s (75% quantile {q75:.1f} s): fit {len(fit_df):,} flows up to t_start "
+          f"{fit_df['t_start'].max():.0f} s, validate {len(val_df):,} flows")
     Xf, yf = xy(fit_df)
     Xv, yv = xy(val_df)
     best, log = {}, []
@@ -123,7 +148,7 @@ def load_params() -> dict:
 
 def cross_validate(train: pd.DataFrame, params: dict, folds: int = 5) -> pd.DataFrame:
     X, y = xy(train)
-    groups = time_blocks(train)
+    groups = campaign_blocks(train)
     cv = StratifiedGroupKFold(n_splits=folds, shuffle=True, random_state=42)
     rows = []
     for k, (tr, va) in enumerate(cv.split(X, y, groups)):

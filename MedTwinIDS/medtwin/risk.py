@@ -37,6 +37,8 @@ class Explainer:
     def __init__(self, normal_stats: pd.DataFrame, importance: dict | None = None, top_k: int = 3):
         self.mu = normal_stats["mean"]
         self.sd = normal_stats["std"].replace(0, np.nan)
+        # constant in normal traffic (e.g. SrcKnown, TTLDev, RstCnt): z is undefined, but any change is evidence
+        self.constant = list(normal_stats.index[normal_stats["std"] == 0])
         self.importance = importance or {}
         self.top_k = top_k
 
@@ -45,7 +47,11 @@ class Explainer:
 
     def explain(self, row: pd.Series) -> list[dict]:
         feats = [f for f in self.mu.index if f not in self.UNINFORMATIVE]
-        z = ((row[feats].astype(float) - self.mu[feats]) / self.sd[feats]).abs().fillna(0)
+        x = row[feats].astype(float)
+        z = ((x - self.mu[feats]) / self.sd[feats]).abs().fillna(0)
+        const = [f for f in self.constant if f in z.index]
+        # a value never seen in normal traffic (e.g. an unregistered sender) outranks rare-count deviations
+        z[const] = np.where((x[const] - self.mu[const]).abs() > 0, 100.0, 0.0)
         # binary indicators deviate by definition; give them a fixed strong score when set
         for f in ("MacMismatch", "ExternalDst", "SvcOther"):
             if f in z and row[f] > 0 and self.mu[f] < 0.05:

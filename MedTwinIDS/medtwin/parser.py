@@ -255,31 +255,30 @@ class FeatureExtractor:
     def _deltas(self, f: pd.DataFrame) -> pd.DataFrame:
         key_cols = ["init_ip", "resp_ip", "svc_port", "proto"]
         f = f.sort_values(key_cols + ["window"])
-        grp = f.groupby(key_cols, sort=False)
-        prev_hr = grp["Heart_rate"].shift()
-        prev_sp = grp["SpO2"].shift()
-        pr_ff = grp["PumpRate"].ffill()
-        prev_pr = pr_ff.groupby([f[c] for c in key_cols], sort=False).shift()
-        first = grp.cumcount() == 0
+        by = [f[c] for c in key_cols]
+        vit = ["Heart_rate", "SpO2", "PumpRate"]
+        first = f.groupby(by, sort=False).cumcount() == 0
+        start = pd.DataFrame(np.nan, index=f.index[first], columns=vit)  # values carried from earlier chunks
         if self.state and first.any():
             keys = list(zip(*(f.loc[first, c] for c in key_cols)))
-            st = [self.state.get(k, (np.nan, np.nan, np.nan)) for k in keys]
-            st = np.array(st, dtype=float).reshape(-1, 3)
-            prev_hr.loc[first] = st[:, 0]
-            prev_sp.loc[first] = st[:, 1]
-            prev_pr.loc[first] = st[:, 2]
-        f["VitalsDelta"] = ((f["Heart_rate"] - prev_hr).abs().fillna(0) + (f["SpO2"] - prev_sp).abs().fillna(0))
-        rel = (f["PumpRate"] - prev_pr).abs() / np.maximum(prev_pr.fillna(0), 10.0)
+            start[vit] = np.array([self.state.get(k, (np.nan,) * 3) for k in keys], dtype=float).reshape(-1, 3)
+        # last observed value per key: a window without telemetry does not reset it, so batch and
+        # streaming extraction agree however the windows are split into chunks
+        ff = f[vit].copy()
+        ff.loc[first] = ff.loc[first].fillna(start)
+        ff = ff.groupby(by, sort=False).ffill()
+        prev = ff.groupby(by, sort=False).shift()
+        prev.loc[first] = start.to_numpy()
+        f["VitalsDelta"] = ((f["Heart_rate"] - prev["Heart_rate"]).abs().fillna(0)
+                            + (f["SpO2"] - prev["SpO2"]).abs().fillna(0))
+        rel = (f["PumpRate"] - prev["PumpRate"]).abs() / np.maximum(prev["PumpRate"].fillna(0), 10.0)
         rel = rel.where(f["PumpRate"].notna(), 0).fillna(0)
         # a command's requested change counts as soon as the command is seen
         f["PumpRateDelta"] = np.maximum(rel, f["CmdDelta"].fillna(0))
-        # update state with the last observation of each key
-        last = f.assign(_pr=pr_ff).groupby(key_cols, sort=False).agg(
-            hr=("Heart_rate", "last"), sp=("SpO2", "last"), pr=("_pr", "last"))
+        # update state with the last observation of each key (already falls back to the carried value)
+        last = ff.groupby(by, sort=False).last()
         for k, row in zip(last.index, last.itertuples(index=False)):
-            old = self.state.get(k, (np.nan, np.nan, np.nan))
-            self.state[k] = (row.hr if pd.notna(row.hr) else old[0], row.sp if pd.notna(row.sp) else old[1],
-                             row.pr if pd.notna(row.pr) else old[2])
+            self.state[k] = tuple(row)
         return f
 
 

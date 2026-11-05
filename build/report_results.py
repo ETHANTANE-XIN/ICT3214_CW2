@@ -13,7 +13,8 @@ MODELS = ["Random Forest", "XGBoost", "MLP"]
 
 
 def num(v, d=3):
-    """Number with a typographic minus sign."""
+    """Number with a typographic minus sign (no minus on a value that rounds to zero)."""
+    v = 0.0 if round(v, d) == 0 else v
     return f"{v:.{d}f}".replace("-", "\u2212")
 
 
@@ -96,11 +97,14 @@ def results(d, C, ctx):
             [1.2, 0.5, 0.6, 0.5, 0.6], size=6.5)
     loud = min(pc[m].loc[c, "f1"] for m in MODELS for c in ("dos_flood", "reconnaissance", "exfiltration",
                                                            "unauthorised_access"))
+    f1s = lambda c: ", ".join(f"{pc[m].loc[c, 'f1']:.3f}" for m in MODELS)
+    # the explanation below is about RF, so it must still be the weakest model on spoofing
+    assert min(MODELS, key=lambda m: pc[m].loc["spoofing", "f1"]) == "Random Forest", "update the spoofing text"
     d.p(refs("{TAB} locates the gap.", d) + f" DoS, reconnaissance, exfiltration and unauthorised access are recognised by every "
         f"model (F1 of {math.floor(loud * 100) / 100:.2f} or more), because their footprints are loud: fan-out, volume or refused logins. The two "
-        f"integrity attacks are harder. RF reaches an F1 of only {pc['Random Forest'].loc['spoofing', 'f1']:.3f} on "
-        f"spoofing and {pc['Random Forest'].loc['data_alteration', 'f1']:.3f} on data alteration. A closer look shows "
-        f"why: RF labels {pct(diag['rf_impostor_as_normal'], 0)} of the impostor's flows (the attacker publishing under "
+        f"integrity attacks are harder: F1-scores are {f1s('spoofing')} on spoofing and {f1s('data_alteration')} on "
+        f"data alteration (RF, XGBoost, MLP). A closer look at spoofing shows why RF lags there: it labels "
+        f"{pct(diag['rf_impostor_as_normal'], 0)} of the impostor's flows (the attacker publishing under "
         f"a victim's identity) as normal, whereas XGBoost and the MLP catch {pct(diag['xgb_impostor'], 0)} and "
         f"{pct(diag['mlp_impostor'], 0)} of them. These flows look like ordinary telemetry; the only evidence is a "
         "handful of twin features (duplicated or missing sequence numbers, a heart rate that disagrees with the "
@@ -112,20 +116,26 @@ def results(d, C, ctx):
     d.h2("Why XGBoost Was Selected")
     ex_runs = extra.pivot(index="seed", columns="model", values="macro_f1")
     wins = int((ex_runs.idxmax(axis=1) == best).sum())
-    worst_mlp = extra[extra["model"] == "MLP"].sort_values("macro_f1").iloc[0]
+    others = sorted([("RF", rf), ("the MLP", ml)], key=lambda o: -o[1]["cv_macro_f1"])
+    narrowest = xg["cv_macro_f1_sd"] <= min(rf["cv_macro_f1_sd"], ml["cv_macro_f1_sd"])
+    fastest = xg["train_s"] <= min(rf["train_s"], ml["train_s"])
     d.p(f"The selection rule uses cross-validation only. XGBoost has the highest cross-validation macro F1-score "
-        f"({xg['cv_macro_f1']:.3f} \u00b1 {xg['cv_macro_f1_sd']:.3f}) and the smallest spread across folds, ahead of "
-        f"the MLP ({ml['cv_macro_f1']:.3f} \u00b1 {ml['cv_macro_f1_sd']:.3f}) and RF ({rf['cv_macro_f1']:.3f} \u00b1 "
-        f"{rf['cv_macro_f1_sd']:.3f}). On the test run, a paired bootstrap shows that its lead over RF is real (95% "
-        f"interval of the macro-F1 difference {num(boot.loc['Random Forest', 'diff_vs_best_low'])} to "
+        f"({xg['cv_macro_f1']:.3f} \u00b1 {xg['cv_macro_f1_sd']:.3f})"
+        + (" and the smallest spread across folds" if narrowest else "") + ", ahead of "
+        + " and ".join(f"{n} ({o['cv_macro_f1']:.3f} \u00b1 {o['cv_macro_f1_sd']:.3f})" for n, o in others)
+        + f". On the test run, a paired cluster bootstrap (resampling whole campaigns) shows that its lead over RF is "
+        f"real (95% interval of the macro-F1 difference {num(boot.loc['Random Forest', 'diff_vs_best_low'])} to "
         f"{num(boot.loc['Random Forest', 'diff_vs_best_high'])}) but that it is statistically tied with the MLP "
         f"({num(boot.loc['MLP', 'diff_vs_best_low'])} to {num(boot.loc['MLP', 'diff_vs_best_high'])}). To separate "
         f"them we ran the saved models on three further unseen wards: XGBoost was best in {wins} of 3 "
-        f"(mean {ex.loc[best, 'mean']:.3f}), while the MLP fell to {worst_mlp['macro_f1']:.3f} in one run, where it "
-        f"missed most flows of a low-intensity clone-spoofing campaign. In processing time XGBoost is also a good fit: "
-        f"it trains fastest ({xg['train_s']:.1f} s against {rf['train_s']:.1f} s and {ml['train_s']:.1f} s), scores "
-        f"one flow in {xg['latency_ms']:.2f} ms and is {xg['size_kb'] / 1024:.1f} MB on disk. The MLP is faster per "
-        f"flow ({ml['latency_ms']:.2f} ms) but less stable and needs scaling and oversampling; RF is "
+        f"(mean {ex.loc[best, 'mean']:.3f}, against {ex.loc['MLP', 'mean']:.3f} for the MLP and "
+        f"{ex.loc['Random Forest', 'mean']:.3f} for RF). In processing time XGBoost is also a good fit: "
+        + (f"it trains fastest ({xg['train_s']:.1f} s against {rf['train_s']:.1f} s and {ml['train_s']:.1f} s)"
+           if fastest else f"it trains in {xg['train_s']:.1f} s (RF {rf['train_s']:.1f} s, MLP {ml['train_s']:.1f} s)")
+        + f", scores one flow in {xg['latency_ms']:.2f} ms and is {xg['size_kb'] / 1024:.1f} MB on disk. The MLP is "
+        f"faster per flow ({ml['latency_ms']:.2f} ms) but "
+        + ("less stable and " if ml["cv_macro_f1_sd"] > xg["cv_macro_f1_sd"] else "")
+        + "needs scaling and oversampling; RF is "
         f"{rf['latency_ms'] / xg['latency_ms']:.0f} times slower per flow and {rf['size_kb'] / xg['size_kb']:.0f} times "
         "larger. With about 30 flows per 5 s window, XGBoost needs well under 0.1 s of model time per window, so "
         "accuracy and stability, not speed, decided the choice.")
@@ -179,8 +189,8 @@ def results(d, C, ctx):
             [1.05, 0.6, 0.6, 0.55, 0.6], size=6.5,
             footnote="Replay: the 3 h test log streamed window by window. Live: a new twin (seed 99, 60 min). "
                      "Time-to-detect runs from campaign start to the end of the first alerting window.")
-    d.figure(FIG / "fig_realtime.png", "Risk of the four highest-risk devices during the live run. PMP-01's peaks at "
-             "minutes 20 and 50 are false alarms from a nurse pausing and then restarting its infusion.", width_in=3.3)
+    d.figure(FIG / "fig_realtime.png", "Risk of the four highest-risk devices during the live run. "
+             + ctx["rt_fig_note"], width_in=3.3)
     d.figure(FIG / "dash_live_crop.png", "Live Ward Monitor during the live run: an infusion pump stopped by a rogue "
              "command (High), the attacking workstation (High) and the targeted gateway (Critical).", width_in=3.3)
 

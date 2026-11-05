@@ -3,15 +3,15 @@
     "campaigns": 12,
     "detected": 12,
     "detection_rate": 1.0,
-    "mean_delay_s": 10.1,
+    "mean_delay_s": 9.7,
     "median_delay_s": 3.5,
-    "alerts": 4965,
-    "false_alerts": 85,
-    "incidents": 55,
-    "flows": 23159,
-    "avg_window_latency_ms": 245.5,
-    "p95_window_latency_ms": 360.5,
-    "wall_seconds": 194.2
+    "alerts": 4838,
+    "false_alerts": 91,
+    "incidents": 59,
+    "flows": 23019,
+    "avg_window_latency_ms": 129.7,
+    "p95_window_latency_ms": 217.9,
+    "wall_seconds": 128.4
   },
   "per_campaign": [
     {
@@ -38,8 +38,8 @@
       "intensity": "high",
       "detected": true,
       "delay_s": 4.2,
-      "alerts": 27,
-      "class_correct": 0.963
+      "alerts": 26,
+      "class_correct": 1.0
     },
     {
       "campaign": 3,
@@ -57,7 +57,7 @@
       "detected": true,
       "delay_s": 2.5,
       "alerts": 89,
-      "class_correct": 1.0
+      "class_correct": 0.989
     },
     {
       "campaign": 5,
@@ -65,7 +65,7 @@
       "intensity": "high",
       "detected": true,
       "delay_s": 1.8,
-      "alerts": 3523,
+      "alerts": 3398,
       "class_correct": 1.0
     },
     {
@@ -73,8 +73,8 @@
       "attack": "data_alteration",
       "intensity": "low",
       "detected": true,
-      "delay_s": 14.3,
-      "alerts": 80,
+      "delay_s": 9.3,
+      "alerts": 63,
       "class_correct": 1.0
     },
     {
@@ -110,7 +110,7 @@
       "intensity": "medium",
       "detected": true,
       "delay_s": 4.3,
-      "alerts": 903,
+      "alerts": 913,
       "class_correct": 1.0
     },
     {

@@ -1,13 +1,13 @@
 {
   "impostor_flows": 125,
-  "victim_flows": 71,
-  "rf_impostor": 0.16,
-  "rf_impostor_as_normal": 0.84,
-  "rf_victim": 0.8309859154929577,
-  "xgb_impostor": 0.976,
-  "xgb_impostor_as_normal": 0.024,
-  "xgb_victim": 0.9577464788732394,
-  "mlp_impostor": 0.968,
-  "mlp_impostor_as_normal": 0.032,
-  "mlp_victim": 1.0
+  "victim_flows": 144,
+  "rf_impostor": 0.904,
+  "rf_impostor_as_normal": 0.096,
+  "rf_victim": 0.7986111111111112,
+  "xgb_impostor": 0.984,
+  "xgb_impostor_as_normal": 0.016,
+  "xgb_victim": 0.9583333333333334,
+  "mlp_impostor": 0.992,
+  "mlp_impostor_as_normal": 0.008,
+  "mlp_victim": 0.9722222222222222
 }

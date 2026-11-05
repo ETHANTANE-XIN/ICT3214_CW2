@@ -180,6 +180,13 @@ class WardTwin:
         self.benign_events = self._schedule_benign()
         self.campaigns = attacks.schedule_campaigns(self)
         self.attacks = attacks
+        # a nurse notices each tampered pump and restores its pre-attack rate shortly after the campaign
+        for c in self.campaigns:
+            if c["type"] == "unauthorised_access":
+                t = c["end"] + float(rng.uniform(30, 90))
+                self.benign_events.append(dict(kind="nurse_pump_restore", bed=c["bed"], campaign=c["id"],
+                                               start=t, end=t + 0.01))
+        self.benign_events.sort(key=lambda e: e["start"])
 
     # ------------------------------------------------------------------ utils
     def hour_at(self, t: float) -> float:
@@ -319,6 +326,13 @@ class WardTwin:
         for c in camps:
             self.attacks.emit(self, c, t0, t1, buf, states)
 
+        # ---- pump restores run after the campaigns so the pre-attack rate is known even in one long step
+        for e in benign:
+            if e["kind"] == "nurse_pump_restore" and t0 <= e["start"] < t1:
+                camp = next((c for c in self.campaigns if c["id"] == e["campaign"]), {})
+                if "base_rate" in camp:  # skipped when no malicious command was sent
+                    self._emit_pump_command(buf, e["start"], e["bed"], malicious=False, new_rate=camp["base_rate"])
+
         return self._capture_artefacts(buf.to_frame())
 
     def _capture_artefacts(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -378,7 +392,7 @@ class WardTwin:
         pump = self.pump_rate[d.bed] if d.type == "infusion_pump" else NAN
         base_len = {"patient_monitor": 190, "wearable": 150, "infusion_pump": 120}[d.type]
         ttl, extra_delay, label, attack, camp, inten = d.ttl, 0.0, 0, C.NORMAL, -1, ""
-        # in-path manipulation (data alteration) is applied by the attack module
+        # in-path manipulation (data alteration) and takeover labels are applied by the attack module
         mod = self.attacks.in_path_effect(self, camps, d, ts)
         if mod is not None:
             vitals = mod["alter"](vitals)

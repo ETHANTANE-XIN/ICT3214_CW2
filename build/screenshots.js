@@ -8,7 +8,8 @@ const pages = process.argv[4] ? process.argv[4].split(",")
   : ["Live Ward Monitor", "Model Evaluation", "Experiments", "Dataset Explorer", "Explainability"];
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+  // PW_CHROMIUM points at a specific Chromium build; otherwise Playwright's own browser is used
+  const browser = await chromium.launch({ executablePath: process.env.PW_CHROMIUM || undefined });
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1.5 });
   await page.goto(base, { waitUntil: "networkidle", timeout: 120000 });
   await page.waitForTimeout(6000);
