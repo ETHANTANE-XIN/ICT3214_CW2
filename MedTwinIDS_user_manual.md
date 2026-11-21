@@ -1,6 +1,6 @@
 # MedTwin-IDS User Manual
 
-AI-driven intrusion detection and device risk scoring for a **medical IoT digital twin** of a hospital ward.
+AI-driven intrusion detection and device risk scoring for a medical IoT digital twin of a hospital ward.
 
 The project simulates an 8-bed ward (patient monitors, infusion pumps, wearables, IoMT gateway, nurse station,
 EHR server), injects six labelled attack families at three intensities, parses the packet log into flow
@@ -26,7 +26,6 @@ python -m medtwin.realtime --minutes 20 --speed 10          # 7. live demo feedi
 python -m pytest -v                         # 8. automated tests (~1.5 min)
 ```
 
-Full instructions are in the user manual submitted with the code (`ICT3214_CW2_User_Manual.docx`).
 
 ## Layout
 
@@ -48,6 +47,3 @@ Full instructions are in the user manual submitted with the code (`ICT3214_CW2_U
 | `dashboard/app.py` | Streamlit analyst dashboard |
 | `tests/test_medtwin.py` | automated tests (pytest) |
 | `data/`, `models/`, `results/`, `runtime/` | generated outputs |
-
-All simulated traffic uses private (RFC 1918) and documentation (RFC 5737) address ranges; nothing touches a
-real network.
