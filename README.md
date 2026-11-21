@@ -13,7 +13,6 @@ with per-device risk scores, grouped incidents and a Streamlit dashboard.
 
 | Path | Contents |
 |---|---|
-| `deliverables/` | Final report (`.doc` as required, and `.docx`), project proposal, presentation slides, user manual |
 | `MedTwinIDS/` | Source code, generated dataset, trained models, results and figures ([details](MedTwinIDS/README.md)) |
 | `build/` | Scripts that build the report, proposal, manual, slides and submission zip from the result files |
 
