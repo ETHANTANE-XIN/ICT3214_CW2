@@ -31,6 +31,7 @@ MODEL_COLOUR = {"Random Forest": "#2a78d6", "XGBoost": "#eb6834", "MLP": "#1baf7
 
 st.markdown("""
 <style>
+[data-testid="stAppDeployButton"], [data-testid="stDeployButton"], .stDeployButton {display: none !important;}
 .block-container {padding-top: 1.2rem;}
 .tile {border-radius: 8px; padding: 6px 8px; margin: 2px 0; color: #fff; font-size: 0.80rem; line-height: 1.25;}
 .bed {border: 1px solid rgba(128,128,128,0.35); border-radius: 10px; padding: 8px; margin-bottom: 8px;}
